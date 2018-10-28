@@ -45,20 +45,20 @@ public class PlayGame {
         // where to record the actions
         // executed. null if not to save.
 
-        //ok git?wwww
+        //ok git?wwwwkkkm,dcda!!!!
         
          // level names from 0 to 4 (game_lvlN.txt).
         String game = gamesPath + games[gameIdx] + ".txt";
         String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx + ".txt";
         String recordGameFile = generateRulePath + games[gameIdx] + "_ggame.txt";
         
-        game = "examples/gridphysics/boulderdash";
+        game = "examples/gridphysics/wildgunman";
         //game = "examples/contphysics/mario";
         level1 = game + "_lvl1" + ".txt"; 
         //game = game + "_glvl.txt";
         game = game + ".txt";
-        String game2 = "examples/generatedgame/boulderdash_ggame.txt";		
-		RuleGenMachine.playOneGame(game2, game2, level1, recordActionsFile, seed);
+        //String game2 = "examples/generatedgame/boulderdash_ggame.txt";		
+		RuleGenMachine.playOneGame(game, game, level1, recordActionsFile, seed);
 	}
 
 }
