@@ -45,7 +45,7 @@ public class PlayGame {
         // where to record the actions
         // executed. null if not to save.
 
-        //ok git?wwwwkkkm,dcda!!!!"
+        //ok git?wwwwkkkm,dcda!!!!"todokeomoi
         
          // level names from 0 to 4 (game_lvlN.txt).
         String game = gamesPath + games[gameIdx] + ".txt";
