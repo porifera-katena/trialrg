@@ -1,0 +1,75 @@
+BasicGame square_size=30
+    SpriteSet
+        collectible >
+            groundTrapHole > SpawnPoint  prob=0.05 hidden=True stype=groundTrap cooldown=5 invisible=true
+            fireStart > Spreader  img=oryx/fire1 shrinkfactor=0.4 color=ORANGE stype=fireEnd spreadprob=1.0
+            groundTrap > Flicker  img=oryx/spike2 limit=5
+            lup > Missile  orientation=UP img=newset/laser1 shrinkfactor=0.5 color=YELLOW speed=0.5
+            ldown > Missile  orientation=DOWN img=newset/laser1 shrinkfactor=0.5 color=YELLOW speed=0.5
+            lright > Missile  orientation=RIGHT img=newset/laser1_1 shrinkfactor=0.5 color=YELLOW speed=0.5
+            lleft > Missile  orientation=LEFT img=newset/laser1_1 shrinkfactor=0.5 color=YELLOW speed=0.5
+            firehole > SpawnPoint  prob=0.05 img=oryx/torch1 stype=fireStart
+            lcup > SpawnPoint  img=newset/lasercannon stype=lup
+            lcright > SpawnPoint  img=newset/lasercannon_1 stype=lright
+            lcleft > SpawnPoint  img=newset/lasercannon_3 stype=lleft
+            fireEnd > Flicker  img=oryx/fire1 limit=3
+            boulderLeft > Missile  img=oryx/planet1 orientation=LEFT speed=0.5
+            boulderRight > Missile  img=oryx/planet1 orientation=RIGHT speed=0.5
+        harmful >
+            lcdown > SpawnPoint  img=newset/lasercannon_2 stype=ldown
+        boulderLefthole > SpawnPoint  prob=0.05 img=newset/hole1 stype=boulderLeft cooldown=2 portal=true
+        boulderRighthole > SpawnPoint  prob=0.05 img=newset/hole1 stype=boulderRight cooldown=2 portal=true
+        gold > Resource  img=oryx/gold1 shrinkfactor=0.5 color=gold limit=11
+        lock > Immovable  img=newset/lock1
+        floor > Immovable  img=oryx/floor3 hidden=True
+        key > Resource  img=oryx/key2 limit=1
+        lasercannonOff > Immovable  img=newset/lasercannon_4
+        avatar > MovingAvatar  img=oryx/rogue healthPoints=10
+        exit > Door  img=oryx/doorclosed1 color=GREEN
+        wall > Immovable  img=oryx/wall3 autotiling=True
+        lcswap > SpawnPoint  img=newset/lasercannon_4 stype=lleft
+    LevelMapping
+        x > exit floor
+        g > gold floor
+        A > avatar floor
+        k > key floor
+        m > lock floor
+        f > firehole floor
+        1 > boulderRighthole floor
+        2 > boulderLefthole floor
+        t > groundTrapHole floor
+        l > lcleft floor
+        r > lcright floor
+        u > lcup floor
+        d > lcdown floor
+        . > floor
+    InteractionSet
+        gold avatar > collectResource
+        key avatar > collectResource
+        groundTrapHole avatar > killSprite scoreChange=1
+        avatar lcdown > killSprite
+        fireStart avatar > killSprite scoreChange=1
+        groundTrap avatar > killSprite scoreChange=1
+        lup avatar > killSprite scoreChange=1
+        ldown avatar > killSprite scoreChange=1
+        lright avatar > killSprite scoreChange=1
+        lleft avatar > killSprite scoreChange=1
+        exit avatar > killSprite
+        boulderLefthole avatar > killSprite
+        boulderRighthole avatar > killSprite
+        fireEnd avatar > killSprite scoreChange=1
+        boulderLeft avatar > killSprite scoreChange=1
+        boulderRight avatar > killSprite scoreChange=1
+        avatar wall > stepBack
+        fireStart wall > wrapAround
+        fireEnd wall > wrapAround
+        boulderLeft wall > wrapAround
+        boulderRight wall > wrapAround
+        groundTrap wall > wrapAround
+        lup wall > wrapAround
+        ldown wall > wrapAround
+        lright wall > wrapAround
+        lleft wall > wrapAround
+    TerminationSet
+        SpriteCounter stype=exit limit=0 win=True
+        SpriteCounter stype=avatar limit=0 win=False

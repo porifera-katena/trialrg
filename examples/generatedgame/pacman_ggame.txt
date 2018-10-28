@@ -1,0 +1,72 @@
+BasicGame square_size=20 obs=wall
+    SpriteSet
+        collectible >
+            fruit > Immovable  img=newset/cherries2 color=PINK
+        fleeing >
+            hungry > OrientedAvatar  img=newset/pacman rotateInPlace=false color=YELLOW speed=0.5
+            powered > OrientedAvatar  img=newset/pacman rotateInPlace=false color=ORANGE speed=0.5
+        redspawn > SpawnPoint  img=portal stype=redOk invisible=True portal=True
+        pellet > Immovable  img=oryx/gold2 shrinkfactor=0.5 color=LIGHTYELLOW
+        orangeOk > RandomPathAltChaser  singleton=True img=oryx/ghost6 cooldown=4 stype1=hungry stype2=powered cons=4
+        pinkOk > RandomPathAltChaser  singleton=True img=oryx/ghost5 cooldown=4 stype1=hungry stype2=powered cons=4
+        blueSc > Fleeing  singleton=True img=oryx/ghost1 stype=pacman cooldown=2 maxDistance=500
+        avatar > MovingAvatar
+        bluespawn > SpawnPoint  img=portal stype=blueOk invisible=True portal=True
+        orangeSc > Fleeing  singleton=True img=oryx/ghost1 stype=pacman cooldown=2 maxDistance=500
+        redSc > Fleeing  singleton=True img=oryx/ghost1 stype=pacman cooldown=2 maxDistance=500
+        blueOk > RandomPathAltChaser  singleton=True img=oryx/ghost4 cooldown=4 stype1=hungry stype2=powered cons=4
+        redOk > RandomPathAltChaser  singleton=True img=oryx/ghost3 cooldown=4 stype1=hungry stype2=powered cons=4
+        power > Immovable  img=oryx/orb2 shrinkfactor=0.8 color=LIGHTGREEN
+        floor > Immovable  img=oryx/floor3
+        orangespawn > SpawnPoint  img=portal stype=orangeOk invisible=True portal=True
+        pinkSc > Fleeing  singleton=True img=oryx/ghost1 stype=pacman cooldown=2 maxDistance=500
+        wall > Immovable  img=oryx/wall3 autotiling=True
+        pinkspawn > SpawnPoint  img=portal stype=pinkOk invisible=True portal=True
+    InteractionSet
+        fruit avatar > killSprite scoreChange=1
+        fruit hungry > killSprite scoreChange=1
+        fruit powered > killSprite scoreChange=1
+        redSc hungry > killSprite scoreChange=1
+        redSc powered > killSprite scoreChange=1
+        blueSc hungry > killSprite scoreChange=1
+        blueSc powered > killSprite scoreChange=1
+        pinkSc hungry > killSprite scoreChange=1
+        pinkSc powered > killSprite scoreChange=1
+        orangeSc hungry > killSprite scoreChange=1
+        orangeSc powered > killSprite scoreChange=1
+        redspawn avatar > killSprite
+        orangespawn avatar > killSprite
+        bluespawn avatar > killSprite
+        pinkspawn avatar > killSprite
+        redspawn hungry > killSprite
+        orangespawn hungry > killSprite
+        bluespawn hungry > killSprite
+        pinkspawn hungry > killSprite
+        redspawn powered > killSprite
+        orangespawn powered > killSprite
+        bluespawn powered > killSprite
+        pinkspawn powered > killSprite
+        avatar EOS > stepBack
+        hungry EOS > stepBack
+        powered EOS > stepBack
+        redOk EOS > reverseDirection
+        redSc EOS > reverseDirection
+        blueOk EOS > reverseDirection
+        blueSc EOS > reverseDirection
+        pinkOk EOS > reverseDirection
+        pinkSc EOS > reverseDirection
+        orangeOk EOS > reverseDirection
+        orangeSc EOS > reverseDirection
+    LevelMapping
+        + > floor
+        0 > floor power
+        . > floor pellet
+        A > floor hungry
+        1 > floor redspawn
+        2 > floor orangespawn
+        3 > floor bluespawn
+        4 > floor pinkspawn
+        f > floor fruit
+        w > floor wall
+    TerminationSet
+        SpriteCounter stype=collectible limit=0 win=True

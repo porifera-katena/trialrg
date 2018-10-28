@@ -1,0 +1,46 @@
+BasicGame square_size=30
+    SpriteSet
+        collectible >
+            gem > Immovable  img=oryx/diamond1 shrinkfactor=0.6 color=GREEN
+        harmful >
+            gold > Immovable  img=oryx/gold2 shrinkfactor=0.5 color=gold
+            boulder > Missile  singleton=True img=oryx/planet speed=0.2
+            monster > Missile  orientation=DOWN img=oryx/scorpion3 color=RED cooldown=4
+            falling > Missile  orientation=DOWN img=oryx/planet color=YELLOW speed=0.5
+        resting > Immovable  singleton=True img=oryx/planet speed=0.0
+        shovel > OrientedFlicker  img=oryx/pickaxe shrinkfactor=0.6 color=LIGHTGRAY limit=2
+        avatar > ShootAvatar  img=oryx/axeman1 stype=shovel
+        floor > Immovable  img=oryx/backlBrown hidden=True
+        entrance > SpawnPoint  total=5 img=newset/hole1 stype=monster cooldown=200 portal=True
+        wall > Immovable  img=oryx/dirtwall autotiling=True
+    LevelMapping
+        0 > gem floor
+        1 > gold floor
+        e > entrance floor
+        m > monster floor
+        . > floor
+        A > avatar floor
+        w > wall floor
+    TerminationSet
+        SpriteCounter stype=collectible limit=0 win=True
+        SpriteCounter stype=avatar limit=0 win=False
+    InteractionSet
+        gem avatar > killSprite scoreChange=1
+        avatar gold > killSprite
+        entrance avatar > killSprite
+        avatar boulder > killSprite
+        avatar monster > killSprite
+        avatar falling > killSprite
+        avatar EOS > stepBack
+        shovel EOS > turnAround
+        boulder EOS > turnAround
+        monster EOS > turnAround
+        falling EOS > turnAround
+        gold shovel > killSprite scoreChange=1
+        shovel gold > killSprite
+        boulder shovel > killSprite scoreChange=1
+        shovel boulder > killSprite
+        monster shovel > killSprite scoreChange=1
+        shovel monster > killSprite
+        falling shovel > killSprite scoreChange=1
+        shovel falling > killSprite

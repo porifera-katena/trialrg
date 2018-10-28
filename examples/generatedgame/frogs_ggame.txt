@@ -1,0 +1,52 @@
+BasicGame
+    SpriteSet
+        collectible >
+            fastRtruck > Missile  orientation=RIGHT img=newset/car3R color=ORANGE speed=0.2
+            slowRtruck > Missile  orientation=RIGHT img=newset/car4R color=RED speed=0.1
+            slowLtruck > Missile  orientation=LEFT img=newset/car4 color=RED speed=0.1
+        harmful >
+            log > Missile  orientation=LEFT img=newset/log color=BROWN speed=0.1
+            forestDense > SpawnPoint  prob=0.4 img=newset/water5 stype=log cooldown=10
+            forestSparse > SpawnPoint  prob=0.1 img=newset/water5 stype=log cooldown=5
+            fastLtruck > Missile  orientation=LEFT img=newset/car3 color=ORANGE speed=0.2
+        goal > Immovable  img=newset/exit2 color=GREEN
+        avatar > MovingAvatar  img=newset/girl1
+        water > Immovable  img=newset/water2_1 color=BLUE
+        grass > Immovable  img=oryx/grass hidden=True autotiling=True
+        highway > Immovable  img=newset/highway hidden=True
+        wall > Immovable  img=oryx/tree2 color=BLACK
+    InteractionSet
+        forestDense avatar > killSprite scoreChange=1
+        forestSparse avatar > killSprite scoreChange=2
+        avatar log > killSprite
+        avatar log > killSprite
+        fastRtruck avatar > killSprite scoreChange=1
+        slowRtruck avatar > killSprite scoreChange=1
+        avatar fastLtruck > killSprite
+        slowLtruck avatar > killSprite scoreChange=1
+        avatar water > killSprite
+        log water > killSprite
+        fastRtruck water > killSprite
+        slowRtruck water > killSprite
+        fastLtruck water > killSprite
+        slowLtruck water > killSprite
+    TerminationSet
+        Timeout limit=700 win=True
+        SpriteCounter stype=avatar limit=0 win=False
+    LevelMapping
+        g > grass goal
+        0 > water grass
+        1 > forestDense water
+        2 > forestDense log
+        3 > forestSparse water
+        4 > forestSparse log
+        - > highway slowRtruck
+        x > highway fastRtruck
+        _ > highway slowLtruck
+        l > highway fastLtruck
+        = > log water
+        B > avatar log water
+        A > avatar grass
+        w > wall grass
+        + > grass
+        . > highway grass

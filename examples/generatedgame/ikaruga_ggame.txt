@@ -1,0 +1,172 @@
+BasicGame square_size=24
+    SpriteSet
+        collectible >
+        harmful >
+            blackPortal2 > SpawnPoint  img=portal total=5 hidden=True stype=blackAlien cooldown=56 invisible=True
+            blackAlien > Bomber  prob=0.01 orientation=DOWN img=oryx/bird3 stype=bomb cooldown=6 speed=0.9
+            whiteAlien > Bomber  prob=0.01 orientation=DOWN img=oryx/bird1 stype=bomb cooldown=6 speed=0.9
+            bomb > Missile  orientation=DOWN img=newset/bomb color=RED cooldown=4 speed=1
+            whiteChanger > Missile  orientation=DOWN img=oryx/mineral1 color=RED cooldown=2 speed=0.5
+            blackChanger > Missile  orientation=DOWN img=oryx/mineral3 color=RED cooldown=2 speed=0.5
+            whitePortal1 > SpawnPoint  img=portal total=10 hidden=True stype=whiteAlien cooldown=28 invisible=True
+            blackPortal1 > SpawnPoint  img=portal total=10 hidden=True stype=blackAlien cooldown=28 invisible=True
+            whitePortal2 > SpawnPoint  img=portal total=5 hidden=True stype=whiteAlien cooldown=56 invisible=True
+            wChangerPortal > SpawnPoint  total=40 img=portal hidden=True stype=whiteChanger cooldown=100 invisible=True
+            bChangerPortal > SpawnPoint  total=40 img=portal hidden=True stype=blackChanger cooldown=100 invisible=True
+        blackAvatar > FlakAvatar  img=oryx/spaceship2 rotateInPlace=False stype=blackBullet
+        whiteAvatar > FlakAvatar  img=oryx/spaceship1 rotateInPlace=False stype=whiteBullet
+        blackBullet > Missile  singleton=True orientation=UP img=oryx/orb3 shrinkfactor=0.5 color=BLUE
+        background > Immovable  img=oryx/space1 hidden=True
+        whiteBullet > Missile  singleton=True orientation=UP img=oryx/cspell1 color=BLUE
+        wall > Immovable  img=oryx/planet color=WHITE
+    LevelMapping
+        o > wall background
+        q > whitePortal1 background
+        w > blackPortal1 background
+        e > whitePortal2 background
+        r > blackPortal2 background
+        A > whiteAvatar background
+        z > wChangerPortal background
+        x > bChangerPortal background
+        . > background
+    TerminationSet
+        SpriteCounter stype=harmful limit=0 win=True
+        SpriteCounter stype=whiteAvatar limit=0 win=False
+    InteractionSet
+        blackPortal1 whiteAvatar > killSprite scoreChange=1
+        blackPortal1 blackAvatar > killSprite scoreChange=1
+        whiteAvatar blackPortal2 > killSprite
+        blackAvatar blackPortal2 > killSprite
+        whiteAvatar blackAlien > killSprite
+        blackAvatar blackAlien > killSprite
+        bomb whiteAvatar > killSprite scoreChange=1
+        whiteAvatar whiteAlien > killSprite
+        blackAvatar whiteAlien > killSprite
+        whiteAvatar bomb > killSprite
+        whiteAvatar whiteAlien > killSprite
+        whiteAvatar blackAlien > killSprite
+        whiteAvatar whiteAlien > killSprite
+        whiteAvatar blackAlien > killSprite
+        whiteAvatar whiteChanger > killSprite
+        whiteAvatar blackChanger > killSprite
+        blackAvatar whiteAlien > killSprite
+        blackAvatar blackAlien > killSprite
+        blackAvatar whiteAlien > killSprite
+        blackAvatar blackAlien > killSprite
+        blackAvatar whiteChanger > killSprite
+        blackAvatar blackChanger > killSprite
+        whiteAvatar bomb > killSprite
+        blackAvatar bomb > killSprite
+        whiteAvatar EOS > stepBack
+        blackAvatar EOS > stepBack
+        whiteBullet EOS > wrapAround
+        blackBullet EOS > wrapAround
+        bomb EOS > wrapAround
+        whiteChanger EOS > wrapAround
+        blackChanger EOS > wrapAround
+        blackAlien EOS > turnAround
+        whiteAlien EOS > turnAround
+        blackPortal2 whiteBullet > killSprite scoreChange=1
+        whiteBullet blackPortal2 > killSprite
+        blackAlien whiteBullet > killSprite scoreChange=1
+        whiteBullet blackAlien > killSprite
+        blackAlien whiteBullet > killSprite scoreChange=1
+        whiteBullet blackAlien > killSprite
+        whiteAlien whiteBullet > killSprite scoreChange=1
+        whiteBullet whiteAlien > killSprite
+        whiteAlien whiteBullet > killSprite scoreChange=1
+        whiteBullet whiteAlien > killSprite
+        bomb whiteBullet > killSprite scoreChange=1
+        whiteBullet bomb > killSprite
+        whiteAlien whiteBullet > killSprite scoreChange=1
+        whiteBullet whiteAlien > killSprite
+        blackAlien whiteBullet > killSprite scoreChange=1
+        whiteBullet blackAlien > killSprite
+        whiteAlien whiteBullet > killSprite scoreChange=1
+        whiteBullet whiteAlien > killSprite
+        blackAlien whiteBullet > killSprite scoreChange=1
+        whiteBullet blackAlien > killSprite
+        whiteChanger whiteBullet > killSprite scoreChange=1
+        whiteBullet whiteChanger > killSprite
+        blackChanger whiteBullet > killSprite scoreChange=1
+        whiteBullet blackChanger > killSprite
+        whiteAlien whiteBullet > killSprite scoreChange=1
+        whiteBullet whiteAlien > killSprite
+        blackAlien whiteBullet > killSprite scoreChange=1
+        whiteBullet blackAlien > killSprite
+        whiteAlien whiteBullet > killSprite scoreChange=1
+        whiteBullet whiteAlien > killSprite
+        blackAlien whiteBullet > killSprite scoreChange=1
+        whiteBullet blackAlien > killSprite
+        whiteChanger whiteBullet > killSprite scoreChange=1
+        whiteBullet whiteChanger > killSprite
+        blackChanger whiteBullet > killSprite scoreChange=1
+        whiteBullet blackChanger > killSprite
+        whitePortal1 whiteBullet > killSprite scoreChange=1
+        whiteBullet whitePortal1 > killSprite
+        blackPortal1 whiteBullet > killSprite scoreChange=1
+        whiteBullet blackPortal1 > killSprite
+        whitePortal2 whiteBullet > killSprite scoreChange=1
+        whiteBullet whitePortal2 > killSprite
+        blackPortal2 whiteBullet > killSprite scoreChange=1
+        whiteBullet blackPortal2 > killSprite
+        wChangerPortal whiteBullet > killSprite scoreChange=1
+        whiteBullet wChangerPortal > killSprite
+        bChangerPortal whiteBullet > killSprite scoreChange=1
+        whiteBullet bChangerPortal > killSprite
+        bomb whiteBullet > killSprite scoreChange=1
+        whiteBullet bomb > killSprite
+        bomb whiteBullet > killSprite scoreChange=1
+        whiteBullet bomb > killSprite
+        blackPortal2 blackBullet > killSprite scoreChange=1
+        blackBullet blackPortal2 > killSprite
+        blackAlien blackBullet > killSprite scoreChange=1
+        blackBullet blackAlien > killSprite
+        blackAlien blackBullet > killSprite scoreChange=1
+        blackBullet blackAlien > killSprite
+        whiteAlien blackBullet > killSprite scoreChange=1
+        blackBullet whiteAlien > killSprite
+        whiteAlien blackBullet > killSprite scoreChange=1
+        blackBullet whiteAlien > killSprite
+        bomb blackBullet > killSprite scoreChange=1
+        blackBullet bomb > killSprite
+        whiteAlien blackBullet > killSprite scoreChange=1
+        blackBullet whiteAlien > killSprite
+        blackAlien blackBullet > killSprite scoreChange=1
+        blackBullet blackAlien > killSprite
+        whiteAlien blackBullet > killSprite scoreChange=1
+        blackBullet whiteAlien > killSprite
+        blackAlien blackBullet > killSprite scoreChange=1
+        blackBullet blackAlien > killSprite
+        whiteChanger blackBullet > killSprite scoreChange=1
+        blackBullet whiteChanger > killSprite
+        blackChanger blackBullet > killSprite scoreChange=1
+        blackBullet blackChanger > killSprite
+        whiteAlien blackBullet > killSprite scoreChange=1
+        blackBullet whiteAlien > killSprite
+        blackAlien blackBullet > killSprite scoreChange=1
+        blackBullet blackAlien > killSprite
+        whiteAlien blackBullet > killSprite scoreChange=1
+        blackBullet whiteAlien > killSprite
+        blackAlien blackBullet > killSprite scoreChange=1
+        blackBullet blackAlien > killSprite
+        whiteChanger blackBullet > killSprite scoreChange=1
+        blackBullet whiteChanger > killSprite
+        blackChanger blackBullet > killSprite scoreChange=1
+        blackBullet blackChanger > killSprite
+        whitePortal1 blackBullet > killSprite scoreChange=1
+        blackBullet whitePortal1 > killSprite
+        blackPortal1 blackBullet > killSprite scoreChange=1
+        blackBullet blackPortal1 > killSprite
+        whitePortal2 blackBullet > killSprite scoreChange=1
+        blackBullet whitePortal2 > killSprite
+        blackPortal2 blackBullet > killSprite scoreChange=1
+        blackBullet blackPortal2 > killSprite
+        wChangerPortal blackBullet > killSprite scoreChange=1
+        blackBullet wChangerPortal > killSprite
+        bChangerPortal blackBullet > killSprite scoreChange=1
+        blackBullet bChangerPortal > killSprite
+        bomb blackBullet > killSprite scoreChange=1
+        blackBullet bomb > killSprite
+        bomb blackBullet > killSprite scoreChange=1
+        blackBullet bomb > killSprite

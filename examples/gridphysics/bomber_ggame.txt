@@ -1,0 +1,58 @@
+BasicGame key_handler=Pulse
+    SpriteSet
+        collectible >
+            box > Immovable  img=newset/block3
+        harmful >
+            lleft > Missile  orientation=LEFT img=newset/laser1_1 shrinkfactor=0.5 color=YELLOW speed=0.5
+            lcleft > SpawnPoint  img=newset/lasercannon_3 stype=lleft
+            bombm > Missile  img=newset/bomb shrinkfactor=0.8 speed=0.8
+        lcup > SpawnPoint  img=newset/lasercannon stype=lup
+        goal > Door  img=oryx/dooropen1 color=GREEN
+        lup > Missile  orientation=UP img=newset/laser1 shrinkfactor=0.5 color=YELLOW speed=0.5
+        avatar > ShootAvatar  frameRate=8 img=oryx/spelunky healthPoints=10 stype=bomb
+        fireStart > Spreader  img=oryx/fire1 color=ORANGE stype=fireEnd spreadprob=1.0
+        bomb > Passive  singleton=True img=newset/bomb
+        water > Immovable  img=oryx/seaWater
+        lcright > SpawnPoint  img=newset/lasercannon_1 stype=lright
+        ldown > Missile  orientation=DOWN img=newset/laser1 shrinkfactor=0.5 color=YELLOW speed=0.5
+        lright > Missile  orientation=RIGHT img=newset/laser1_1 shrinkfactor=0.5 color=YELLOW speed=0.5
+        lcdown > SpawnPoint  img=newset/lasercannon_2 stype=ldown
+        spark > SpawnPoint  total=1 img=oryx/slash1 shrinkfactor=0.6 stype=fireStart
+        fireEnd > Immovable  img=oryx/fire1
+        ground > Immovable  img=oryx/floor3 hidden=True
+        wall > Immovable  img=oryx/wall3 autotiling=True
+        mud > Immovable  img=oryx/backLBrown
+        lcswap > SpawnPoint  img=newset/lasercannon_4 stype=lleft
+    LevelMapping
+        g > goal ground
+        e > box ground
+        b > bomb ground
+        , > ground
+        . > water
+        A > avatar ground
+        1 > lcup ground
+        2 > lcright ground
+        3 > lcdown ground
+        4 > lcleft ground
+    InteractionSet
+        box avatar > killSprite scoreChange=1
+        avatar lleft > killSprite
+        goal avatar > killSprite
+        avatar bombm > killSprite
+        avatar wall > stepBack
+        lup wall > turnAround
+        ldown wall > turnAround
+        lright wall > turnAround
+        lleft wall > turnAround
+        bombm wall > turnAround
+        fireStart wall > turnAround
+        bomb wall > turnAround
+        lleft bomb > killSprite scoreChange=1
+        bomb lleft > killSprite
+        lcleft bomb > killSprite scoreChange=1
+        bomb lcleft > killSprite
+        bombm bomb > killSprite scoreChange=1
+        bomb bombm > killSprite
+    TerminationSet
+        SpriteCounter stype=goal limit=0 win=True
+        SpriteCounter stype=avatar limit=0 win=False

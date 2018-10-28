@@ -1,0 +1,24 @@
+BasicGame key_handler=Pulse square_size=60
+    SpriteSet
+        prepaint > Flicker  limit=2 invisible=TRUE
+        preground > Flicker  limit=2 invisible=TRUE
+        prepainting > Resource  limit=2
+        pregrounding > Resource  limit=2
+        paint > Immovable  img=newset/paint2 color=DARKBLUE
+        ground > Immovable  img=oryx/backGrey color=GRAY
+        avatar > MovingAvatar  img=newset/painter21 shrinkfactor=0.8
+        wall > Immovable  img=newset/floor5
+    LevelMapping
+        A > avatar ground
+        . > ground
+        x > paint
+        w > wall
+    InteractionSet
+        paint avatar > addHealthPoints
+        ground avatar > undoAll
+        paint avatar > flipDirection
+        EOS paint > killSprite
+        avatar paint > addHealthPoints scoreChange=0
+    TerminationSet
+        Timeout limit=1035 win=True
+        SpriteCounter stype=avatar limit=0 win=False
