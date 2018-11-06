@@ -507,13 +507,16 @@ public class VGDLParser {
 	 */
 	@SuppressWarnings("unchecked")
 	private void parseInteractionSet(ArrayList<Node> elements) throws Exception {
+		/*++*/
+		int id = 0;
 		for (Node n : elements) {
 			InteractionContent ic = (InteractionContent) n.content;
 			ic.lineNumber = n.lineNumber;
 			if (ic.is_definition) // === contains ">"
 			{
 				Effect ef = VGDLFactory.GetInstance().createEffect(game, ic);
-
+				ef.setId(id);
+				id++;
 				// Get the identifiers of the first sprite taking part in the
 				// effect.
 				int obj1 = VGDLRegistry.GetInstance().getRegisteredSpriteValue(ic.object1);

@@ -23,6 +23,10 @@ import tools.Vector2d;
  * This is a Java port from Tom Schaul's VGDL - https://github.com/schaul/py-vgdl
  */
 public abstract class Effect{
+	/*++*/
+	public int id;
+	
+	public int executed_num = 0;
 
     //Indicates if this effect kills any sprite
     public boolean is_kill_effect = false;
@@ -74,7 +78,19 @@ public abstract class Effect{
      * Collision for batches
      */
     protected Rectangle collision;
-
+    /*++*/
+    public void setId(int newid) {
+    	id = newid;
+    }
+    
+    public void count(int num) {
+    	executed_num += num;
+    }
+    
+    public void count() {
+    	executed_num += 1;
+    }
+    
     /**
      * Executes the effect
      *

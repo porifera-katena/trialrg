@@ -746,6 +746,7 @@ public class Chromosome implements Comparable<Chromosome>{
 					Event e = iter1.next();
 					events.add(e.activeTypeId + "" + e.passiveTypeId);
 				}
+				System.out.println("events = " + events);
 				score = -200;
 			}
 			 

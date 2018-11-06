@@ -1467,7 +1467,7 @@ public abstract class Game {
 							}
 						}
 						catch(ConcurrentModificationException e){
-							Logger.getInstance().addMessage(new Message(Message.WARNING, "you can't spawn sprites outside of the screen."));
+							//Logger.getInstance().addMessage(new Message(Message.WARNING, "you can't spawn sprites outside of the screen."));
 						}
 					}
 			}
