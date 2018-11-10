@@ -64,7 +64,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 
 	@Override
 	public String[][] generateRules(SLDescription sl, ElapsedCpuTimer time) {
-
+		
 		ArrayList<String> interactions = new ArrayList<String>();
 		ArrayList<String> terminations = new ArrayList<String>();
 		SpriteData sprites[] = sl.getGameSprites();
@@ -102,7 +102,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		}
 
 		for(int evo=0;evo<EVOLUTION_NUM;evo++) {
-
+			System.out.println("Generation : " + evo);
 			ArrayList<StateObservation> states = new ArrayList<StateObservation>();
 			for(int i=0;i<INTERACTION_NUM;i++) {
 				ArrayList<String> minusedInteraction = (ArrayList<String>) interactions.clone();
@@ -215,7 +215,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		//constrainFitness = (goodFrame / (40.0));
 
 		//this.fitness.set(0, constrainFitness);
-		System.out.println("++++");
+		System.out.print("+");
 		return result;
 	}
 
