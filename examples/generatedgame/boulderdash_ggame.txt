@@ -20,15 +20,15 @@ BasicGame
         b > background butterfly
         A > background avatar
     InteractionSet
-        sword background > killSprite scoreChange=0
-        exitdoor sword > teleportToExit
-        boulder diamond > stepBack
-        butterfly boulder > killIfFromAbove scoreChange=-2
-        wall dirt > killIfFromAbove scoreChange=-1
-        avatar crab > killIfFromAbove
-        butterfly diamond > teleportToExit
-        sword dirt > teleportToExit scoreChange=2
+        wall crab > cloneSprite scoreChange=-1
+        boulder background > turnAround
+        exitdoor background > wrapAround scoreChange=-1
+        sword exitdoor > addHealthPoints scoreChange=2
+        avatar sword > flipDirection scoreChange=1
+        boulder background > stepBack scoreChange=2
+        butterfly wall > bounceForward scoreChange=0
+        diamond wall > addHealthPointsToMax
     TerminationSet
         SpriteCounter stype=avatar limit=0 win=False
-        Timeout limit=873 win=True
-        Timeout limit=829 win=True
+        Timeout limit=1092 win=True
+        SpriteCounter stype=boulder limit=0 win=True

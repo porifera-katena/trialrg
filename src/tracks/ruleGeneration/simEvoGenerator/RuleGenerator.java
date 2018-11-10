@@ -137,7 +137,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			}
 			Collections.sort(scoreData);
 			for(int i=0;i<INTERACTION_WASTE;i++) {
-				int id = scoreData.get(i).id;
+				int id = scoreData.get(ITERATION-i-1).id;
 				if(id<INTERACTION_NUM) {
 					interactions.set(id,"");
 				}
