@@ -1,6 +1,7 @@
 package tracks.ruleGeneration.simEvoGenerator;
 
 import java.lang.Thread.State;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -29,15 +30,16 @@ import tools.ElapsedCpuTimer;
 import tools.IO;
 
 public class RuleGenerator extends AbstractRuleGenerator{
-	
+
 	private Random random;
-	
+
 	private int INTERACTION_NUM = 10;
-	
+	private int INTERACTION_WASTE = 3;
+
 	private static int FEASIBILITY_STEP_LIMIT = 40;
-	
-	private static int EVOLUTION_NUM = 40;
-	
+
+	private int EVOLUTION_NUM = 2;
+
 	private String[] interactions = new String[] { "killSprite", "killAll", "killIfHasMore", "killIfHasLess",
 			"killIfFromAbove", "killIfOtherHasMore", "spawnBehind", "stepBack", "spawnIfHasMore", "spawnIfHasLess",
 			"cloneSprite", "transformTo", "undoAll", "flipDirection", "transformToRandomChild", "updateSpawnType",
@@ -45,24 +47,25 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			"increaseSpeedToAll", "decreaseSpeedToAll", "attractGaze", "align", "turnAround", "wrapAround",
 			"pullWithIt", "bounceForward", "teleportToExit", "collectResource", "setSpeedForAll", "undoAll",
 			"reverseDirection", "changeResource" };
-	
+
 	public RuleGenerator(SLDescription sl, ElapsedCpuTimer time) {
 		this.random = new Random();
-		
+
 		/*for(SpriteData s : sl.getGameSprites())
 			System.out.println(s);*/
-		
+
 		constructAgent(sl);
 	}
-	
-	
+
+
 	@Override
 	public String[][] generateRules(SLDescription sl, ElapsedCpuTimer time) {
-		
+
 		ArrayList<String> interactions = new ArrayList<String>();
 		ArrayList<String> terminations = new ArrayList<String>();
 		SpriteData sprites[] = sl.getGameSprites();
 		terminations.add("SpriteCounter stype=" + getAvatar(sprites) + " limit=0 win=False");
+
 		while(interactions.size()<INTERACTION_NUM) {
 			interactions.add(createInteraction(sprites));
 			sl.testRules(toStringArray(interactions),toStringArray(terminations));
@@ -70,65 +73,95 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				interactions.remove(interactions.size()-1);
 			}
 		}
-		
-		ArrayList<StateObservation> states = new ArrayList<StateObservation>();
-		//ArrayList<Double> results = new ArrayList<Double>();
-		for(int i=0;i<interactions.size();i++) {
-			//double firstScore = 0.0;
+		ArrayList<SLDescription> SLs = new ArrayList<SLDescription>();
+
+		for(int i=0;i<INTERACTION_NUM;i++) {
 			VGDLFactory.GetInstance().init();
 			VGDLRegistry.GetInstance().init();
-			
+
 			Game toPlay = new VGDLParser().parseGame(SharedData.gamefile);
 			String[] lines = new IO().readFile(SharedData.levelfile);
 			try {
-				ArrayList<String> minusedInteraction = (ArrayList<String>) interactions.clone();
-				minusedInteraction.remove(i);
-				SLDescription tempsl = new SLDescription(toPlay, lines, SharedData.seed);
-				states.add(tempsl.testRules(toStringArray(minusedInteraction), toStringArray(terminations)));
-				//results.add(firstScore);
+				SLs.add(new SLDescription(toPlay, lines, SharedData.seed));
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		
-		double results[] = new double[states.size()];
-		double fitness[] = new double[interactions.size()];
-		System.out.println(states.size() +"+"+ interactions.size());
 
-		Double[][] scores = new Double[(interactions.size())][];
-		if(feasibilityTest(sl, interactions, terminations)[0]<1.0) {
-			IntStream.range(0, interactions.size()).parallel().forEach(i -> {
-				scores[i] = feasibilityTest(states.get(i));
-			});
+		for(int evo=0;evo<EVOLUTION_NUM;evo++) {
+
+			ArrayList<StateObservation> states = new ArrayList<StateObservation>();
+			for(int i=0;i<INTERACTION_NUM;i++) {
+				ArrayList<String> minusedInteraction = (ArrayList<String>) interactions.clone();
+				minusedInteraction.remove(i);
+				states.add(SLs.get(i).testRules(toStringArray(minusedInteraction), toStringArray(terminations)));
+			}
+			//double results[] = new double[states.size()];
+			//double fitness[] = new double[INTERACTION_NUM];
+			System.out.println(states.size() +"+"+ interactions.size());
+
+			Double[][] scores = new Double[(INTERACTION_NUM)][];
+			if(feasibilityTest(sl, interactions, terminations)[0]<1.0) {
+				IntStream.range(0, interactions.size()).parallel().forEach(i -> {
+					scores[i] = feasibilityTest(states.get(i));
+				});
+			}
+			else {
+				IntStream.range(0, INTERACTION_NUM).parallel().forEach(i -> {
+					scores[i] = getFitness(states.get(i));
+				});
+			}
+			ArrayList<ScoreData> scoreData = new ArrayList<ScoreData>();
+
+			for(int i=0;i<INTERACTION_NUM;i++) {
+				scoreData.add(new ScoreData(i, scores[i]));
+				System.out.println("Scores = " + scores[i][0]);
+			}
+			Collections.sort(scoreData);
+			for(int i=0;i<INTERACTION_WASTE;i++) {
+				interactions.set(scoreData.get(i).id,""); 
+			}
+			for(int i=0;i<INTERACTION_WASTE;i++) {
+				interactions.remove(""); 
+			}
+
+			if(false) {
+				String[][] rules = {toStringArray(interactions),toStringArray(terminations)};
+				return rules;
+			}
+
+			while(interactions.size()<INTERACTION_NUM) {
+				interactions.add(createInteraction(sprites));
+				sl.testRules(toStringArray(interactions),toStringArray(terminations));
+				if(sl.getErrors().size()>0) {
+					interactions.remove(interactions.size()-1);
+				}
+			}
+
 		}
-		else {
-			IntStream.range(0, interactions.size()).parallel().forEach(i -> {
-				scores[i] = getFitness(states.get(i));
-			});
-		}
-		ArrayList<ScoreData> scoreDatas = new ArrayList<ScoreData>(interactions.size());
-		//Collections.sort(scores);
-		for(Double[] s:scores)
-		System.out.println("Scores = " + s.toString());
-		
+		/*for(int i=0;i<INTERACTION_NUM;i++) {
+			//scoreData.add(new ScoreData(i, scores[i]));
+			System.out.println("Sorted = " + scoreData.get(i).score[1] + "__" + scoreData.get(i).score[0]);
+		}*/
+
 		System.out.println();
-		
-		StateObservation SObs = sl.testRules(toStringArray(interactions),toStringArray(terminations));
-		
-		
+
+		//StateObservation SObs = sl.testRules(toStringArray(interactions),toStringArray(terminations));
+
+
 		//System.out.println(toStringArray(interactions)[0]+"??");
 		String[][] rules = {toStringArray(interactions),toStringArray(terminations)};
 		return rules;
 	}
-	
+
 	private Double[] feasibilityTest(StateObservation state) {		
 		//int errorCount = sl.getErrors().size();
 		//StateObservation state = sl.testRules(toStringArray(interactions),toStringArray(terminations));
 		double constrainFitness = 0;
 		//constrainFitness += (0.5) * 1.0 / (errorCount + 1.0);	
 		int goodFrame = Integer.MAX_VALUE;
-		
+
 		AbstractPlayer doNothingAgent = null;
 		try{
 			Class agentClass = Class.forName(SharedData.DO_NOTHING_AGENT_NAME);
@@ -141,7 +174,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		for(int i = 0; i < SharedData.REPETITION_AMOUNT; i++) { //**************```````````++++++++++++++++++++++++
 			//System.out.print("?");
 			int temp = getAgentResult(state.copy(), FEASIBILITY_STEP_LIMIT, doNothingAgent);
-			
+
 			if(temp < goodFrame){
 				goodFrame = temp;
 			}
@@ -154,13 +187,13 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		System.out.println("++++");
 		return result;
 	}
-	
+
 	private Double[] feasibilityTest(SLDescription sl,ArrayList<String> interactions, ArrayList<String> terminations) {		
 		//int errorCount = sl.getErrors().size();
 		StateObservation state = sl.testRules(toStringArray(interactions),toStringArray(terminations));
 		return feasibilityTest(state);
 	}
-	
+
 	private Double[] getFitness(StateObservation state) {
 		Double[][] temp = {{Double.NEGATIVE_INFINITY,-100.0,0.0},{Double.NEGATIVE_INFINITY,-100.0,0.0}};
 		for(int j=0;j<SharedData.REPETITION_AMOUNT;j++) {
@@ -177,17 +210,18 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				temp1[1] = temp1[0].clone();
 			}
 		}
+		if(temp1[1][1]==0)temp1[1][1] = -1.0;
 		temp[1][0] = temp[1][0] - temp1[1][0];
 		temp[1][1] = temp[1][1] - temp1[1][1];
 		return temp[1];
-	
+
 	}
-	
+
 	private Double[] getFitness(SLDescription sl,ArrayList<String> interactions, ArrayList<String> terminations) {
 		StateObservation state =  sl.testRules(toStringArray(interactions),toStringArray(terminations));
 		return getFitness(state);
 	}
-	
+
 	private Double[] getScore(StateObservation state,String AgentName,int step) {
 		AbstractPlayer Agent = null;
 		try{
@@ -204,12 +238,12 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		System.out.print("?");
 		return score;
 	}
-	
+
 	private int getAgentResult(StateObservation stateObs, int steps, AbstractPlayer agent){
 		int i =0;
 		int k = 0;
 		//System.out.println("getAgentResults");
-		
+
 		for(i=0;i<steps;i++){
 			if(stateObs.isGameOver()){
 				break;
@@ -228,14 +262,14 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		//System.out.println("getAgentResults-end");
 		return i;
 	}
-	
+
 	private void cleanOpenloopAgents() {
 		((tracks.singlePlayer.advanced.olets.Agent)SharedData.automatedAgent).mctsPlayer = 
-			new tracks.singlePlayer.advanced.olets.SingleMCTSPlayer(new Random(), 
-				(tracks.singlePlayer.advanced.olets.Agent) SharedData.automatedAgent);
+				new tracks.singlePlayer.advanced.olets.SingleMCTSPlayer(new Random(), 
+						(tracks.singlePlayer.advanced.olets.Agent) SharedData.automatedAgent);
 	}
-	
-	private int checkIfOffScreen(StateObservation stateObs) {
+
+	/*private int checkIfOffScreen(StateObservation stateObs) {
 		ArrayList<Observation> allSprites = new ArrayList<Observation>();
 		ArrayList<Observation>[] temp = stateObs.getNPCPositions();
 		if(temp != null) {
@@ -249,18 +283,18 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				allSprites.addAll(list);
 			}
 		}
-		
+
 		temp = stateObs.getMovablePositions();
 		if(temp != null) {
 			for(ArrayList<Observation> list : temp) {
 				allSprites.addAll(list);
 			}
 		}
-		
+
 		// calculate screen size
 		int xMin = -1 * stateObs.getBlockSize();
 		int yMin = -1 * stateObs.getBlockSize();
-		
+
 		// add a 1 pixel buffer
 		int xMax = (SharedData.la.getWidth()+1) * stateObs.getBlockSize();
 		int yMax = (SharedData.la.getLength()+1) * stateObs.getBlockSize();
@@ -276,15 +310,15 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			}
 		}
 		return counter;
-		
-	}
-	
+
+	}*/
+
 	private String[] toStringArray(ArrayList<String> arlist) {
 		String[] str = new String[arlist.size()];
 		arlist.toArray(str);
 		return str;
 	}
-	
+
 	private String createInteraction(SpriteData[] Sprites) {
 		int i1 = this.random.nextInt(Sprites.length);
 		int i2 = (i1 + 1 + this.random.nextInt(Sprites.length - 1)) % Sprites.length;
@@ -297,36 +331,36 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		return (Sprites[i1].name + " " + Sprites[i2].name + " > " +
 				this.interactions[this.random.nextInt(this.interactions.length)] + " " + scoreChange);
 	}
-	
+
 	private String createTermiination(SpriteData[] Sprites) {
 		if (this.random.nextBoolean()) {
-		    return "Timeout limit=" + (800 + this.random.nextInt(500)) + " win=True";
+			return "Timeout limit=" + (800 + this.random.nextInt(500)) + " win=True";
 		} else {
-		    String chosen = Sprites[this.random.nextInt(Sprites.length)].name;
-		    String result = "win=True";
-		    if(this.random.nextInt(10)==0) {
-		    	result = "win=False";
-		    }
+			String chosen = Sprites[this.random.nextInt(Sprites.length)].name;
+			String result = "win=True";
+			if(this.random.nextInt(10)==0) {
+				result = "win=False";
+			}
 			return "SpriteCounter stype=" + chosen + " limit=0 " + result;
 		}
 		// Add a losing termination condition
 		//"SpriteCounter stype=" + this.avatar + " limit=0 win=False";
 	}
-	
+
 	private void resetCount(SLDescription sl) {
 		Game game = sl.getCurrentGame();
 		for(Effect e :game.getAllEffects()) {
 			e.resetCount();
 		}
 	}
-	
+
 	/*private void resetCount(StateObservation SObs) {
 		Game game = SObs.get;
 		for(Effect e :game.getAllEffects()) {
 			e.resetCount();
 		}
 	}*/
-	
+
 	private String getAvatar(SpriteData[] Sprites) {
 		for (SpriteData s:Sprites) {
 			if (s != null && s.isAvatar) {
@@ -335,8 +369,8 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		}
 		return "";
 	}
-	
-	
+
+
 	private void constructAgent(SLDescription sl){
 		try{
 			Class agentClass = Class.forName(SharedData.BEST_AGENT_NAME);
@@ -380,7 +414,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 class ScoreData implements Comparable<ScoreData>{
 	public int id;
 	public Double[] score;
-	
+
 	public ScoreData(int _id,Double[] _score) {
 		this.id = _id;
 		this.score = _score;
@@ -388,12 +422,14 @@ class ScoreData implements Comparable<ScoreData>{
 
 	@Override
 	public int compareTo(ScoreData o) {
-		if(this.score[1] == o.score[1]) {
+		if((double)this.score[1] == (double)o.score[1]) {
+			//System.out.print("{" +((Double)(this.score[0] - o.score[0])).intValue() + "}");
 			return ((Double)(this.score[0] - o.score[0])).intValue();
 		}
 		else {
+			//System.out.print("<" +((Double)(this.score[1] - o.score[1])).intValue()+">" + this.score[1] +"*"+ o.score[1]);
 			return ((Double)(this.score[1] - o.score[1])).intValue();
 		}
 	}
-	
+
 }
