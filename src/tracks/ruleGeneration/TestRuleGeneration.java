@@ -2,6 +2,8 @@ package tracks.ruleGeneration;
 
 import java.util.Random;
 
+import tracks.ruleGeneration.simEvoGenerator.SharedData;
+
 /**
  * Created by dperez on 19/03/2017.
  */
@@ -14,6 +16,7 @@ public class TestRuleGeneration {
         String randomRuleGenerator = "tracks.ruleGeneration.randomRuleGenerator.RuleGenerator";
         String constructiveRuleGenerator = "tracks.ruleGeneration.constructiveRuleGenerator.RuleGenerator";
         String geneticRuleGenerator = "tracks.ruleGeneration.geneticRuleGenerator.RuleGenerator";
+        String simEvoRuleGenerator = "tracks.ruleGeneration.simEvoGenerator.RuleGenerator";
 
         // Available games:
         String gamesPath = "examples/gridphysics/";
@@ -56,11 +59,15 @@ public class TestRuleGeneration {
         String game = gamesPath + games[gameIdx] + ".txt";
         String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx + ".txt";
         String recordGameFile = generateRulePath + games[gameIdx] + "_ggame.txt";
+        
+        SharedData.gamefile = game;
+        SharedData.levelfile = level1;
+        SharedData.seed = seed;
 
         // 1. Generate rules (Interaction and Terminations) for a fixed level
-        if(RuleGenMachine.generateRules(game, level1, geneticRuleGenerator, recordGameFile, seed)){
-             RuleGenMachine.playOneGame(game, recordGameFile, level1, recordActionsFile, seed);
-            //RuleGenMachine.runOneGame(game, recordGameFile, level1, visuals, sampleMCTSController, recordActionsFile, seed, 0);
+        if(RuleGenMachine.generateRules(SharedData.gamefile, SharedData.levelfile, simEvoRuleGenerator, recordGameFile, SharedData.seed)){
+            // RuleGenMachine.playOneGame(game, recordGameFile, level1, recordActionsFile, seed);
+            RuleGenMachine.runOneGame(SharedData.gamefile, recordGameFile, SharedData.levelfile, visuals, sampleMCTSController, recordActionsFile, SharedData.seed, 0);
         }
     }
 }

@@ -360,6 +360,10 @@ public abstract class Effect{
                 sprite1.rect.width, sprite1.rect.height);
     }
 
+	public void resetCount() {
+		this.executed_num = 0;
+	}
+
 
 
 

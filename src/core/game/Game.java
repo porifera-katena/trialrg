@@ -24,6 +24,7 @@ import tools.pathfinder.PathFinder;
 
 import javax.swing.*;
 import java.awt.*;
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -351,6 +352,7 @@ public abstract class Game {
 			singletons[intId] = true;
 		}
 
+		VGDLRegistry.GetInstance();
 		// Constructors, as many as number of sprite types, so they are accessed
 		// by its id:
 		classConst = new Content[VGDLRegistry.GetInstance().numSpriteTypes()];
@@ -1404,6 +1406,7 @@ public abstract class Game {
 					// With no sprite, the effect is independent from particular
 					// sprites.
 					ef.execute(null, null, this);
+					ef.count();
 					exec = true;
 
 					// Affect score for all players:
@@ -1572,7 +1575,8 @@ public abstract class Game {
 	private void executeEffect(Effect ef, VGDLSprite s1, VGDLSprite s2) {
 		// There is a collision. Apply the effect.
 		ef.execute(s1, s2, this);
-
+		/**/
+		ef.count();
 		// Affect score:
 		if (ef.applyScore) {
 			// apply scores for all avatars
@@ -1597,7 +1601,27 @@ public abstract class Game {
 			}
 		}
 	}
-
+	
+	public ArrayList<Effect> getAllEffects(){
+		ArrayList<Effect> allEf = new ArrayList<Effect>();
+		for(ArrayList<Effect> efs : this.eosEffects) {
+			for(Effect e:efs) {
+				allEf.add(e);
+			}
+		}
+		for(ArrayList<Effect>[] efss : this.collisionEffects) {
+			for(ArrayList<Effect> efs:efss) {
+				for(Effect e:efs) {
+					allEf.add(e);
+				}
+			}
+		}
+		for(Effect e : this.timeEffects) {
+			allEf.add(e);
+		}
+		return allEf;
+	}
+	
 	private void addEvent(VGDLSprite s1, VGDLSprite s2) {
 		if (s1.is_avatar)
 			historicEvents.add(
@@ -1648,13 +1672,13 @@ public abstract class Game {
 				}
 			}
 		}
-		if(Logger.getInstance().getMessageCount() > CompetitionParameters.MAX_ALLOWED_WARNINGS){
+		/*if(Logger.getInstance().getMessageCount() > CompetitionParameters.MAX_ALLOWED_WARNINGS){
 			System.out.println("Finishing the game due to number of warnings: " + Logger.getInstance().getMessageCount() +
 			 ". Messages will be flushed.");
-			Logger.getInstance().printMessages();
+			//Logger.getInstance().printMessages();
 		    isEnded = true;
-		    Logger.getInstance().flushMessages();
-		}
+		    //Logger.getInstance().flushMessages();
+		}*/
 	}
 
 	/**

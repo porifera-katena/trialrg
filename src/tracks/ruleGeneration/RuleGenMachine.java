@@ -193,6 +193,12 @@ public class RuleGenMachine
 			AbstractRuleGenerator generator = createRuleGenerator(ruleGenerator, sl);
 			String[][] rules = getGeneratedRules(sl, toPlay, generator);
 			HashMap<String, ArrayList<String>> spriteSetStructure = generator.getSpriteSetStructure();
+			for(String[] r:rules) {
+				for(String s:r) {
+					System.out.println(s);
+				}
+				System.out.println();
+			}
 			rules = sl.modifyRules(rules[0], rules[1], randomSeed);
 
 			SpriteData[] data = sl.getGameSprites();
@@ -388,6 +394,15 @@ public class RuleGenMachine
 	 * @param rules		the generated rules
 	 */
 	private static void saveGame(String gameFile, String modifiedFile, String[][] rules, HashMap<String, ArrayList<String>> setStructure, HashMap<String, String> sprites) {
+		
+		/*
+		for(String[] r:rules) {
+			for(String s:r) {
+				System.out.println(s);
+			}
+			System.out.println();
+		}
+		*/
 		try {
 			if (modifiedFile != null) {
 				BufferedWriter writer = new BufferedWriter(new FileWriter(modifiedFile));

@@ -65,6 +65,8 @@ public class RuleGenerator extends AbstractRuleGenerator {
 		}
 		this.usefulSprites.add("EOS");
 		this.avatar = this.getAvatar(sl);
+		for(String s:this.usefulSprites)
+			System.out.println(s);
 	}
 
 	/**

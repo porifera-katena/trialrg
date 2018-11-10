@@ -67,7 +67,7 @@ public class SLDescription {
 
 		this.reset(currentGame, level);
 	}
-
+	
 	/**
 	 * reset the current variables to a new current game and level
 	 *
@@ -320,7 +320,7 @@ public class SLDescription {
 	 */
 	public StateObservation testRules(String[] rules, String[] wins, HashMap<String, ArrayList<String>> spriteSetStructure) {
 		Logger.getInstance().flushMessages();
-
+		
 		String[][] rw = this.modifyRules(rules, wins, this.shift);
 		HashMap<String, String> msprites = new HashMap<String, String>();
 		for(int i=0; i<this.gameSprites.length; i++){
@@ -348,9 +348,9 @@ public class SLDescription {
 
 		this.currentGame.reset();
 		this.currentGame.buildStringLevel(this.level, this.random.nextInt());
-		if (Logger.getInstance().getMessageCount(Message.ERROR) > 0) {
+		/*if (Logger.getInstance().getMessageCount(Message.ERROR) > 0) {
 			return null;
-		}
+		}*/
 		return this.currentGame.getObservation();
 	}
 
@@ -366,6 +366,12 @@ public class SLDescription {
      * 
      * @return a list of errors
      */
+	
+	/**/
+	public Game getCurrentGame() {
+		return this.currentGame;
+	}
+	
     public ArrayList<Message> getErrors() {
 	return Logger.getInstance().getMessages(Message.ERROR);
     }
