@@ -20,6 +20,7 @@ import core.game.GameDescription.SpriteData;
 import core.game.SLDescription;
 import core.game.StateObservation;
 import core.generator.AbstractRuleGenerator;
+import core.logging.Logger;
 import core.player.AbstractPlayer;
 import core.vgdl.VGDLFactory;
 import core.vgdl.VGDLParser;
@@ -64,7 +65,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 
 	@Override
 	public String[][] generateRules(SLDescription sl, ElapsedCpuTimer time) {
-		
+		 Logger.getInstance().active = false;
 		ArrayList<String> interactions = new ArrayList<String>();
 		ArrayList<String> terminations = new ArrayList<String>();
 		SpriteData sprites[] = sl.getGameSprites();

@@ -1308,7 +1308,7 @@ public abstract class Game {
 				}
 			}
 		} else {
-			Logger.getInstance().addMessage(new Message(Message.WARNING, "No avatars found."));
+			//Logger.getInstance().addMessage(new Message(Message.WARNING, "No avatars found."));
 		}
 	}
 
@@ -1781,7 +1781,7 @@ public abstract class Game {
 	@SuppressWarnings("unchecked")
 	public VGDLSprite addSprite(SpriteContent content, Vector2d position, int itype, boolean force) {
 		if (num_sprites > MAX_SPRITES) {
-			Logger.getInstance().addMessage(new Message(Message.WARNING, "Sprite limit reached."));
+			//Logger.getInstance().addMessage(new Message(Message.WARNING, "Sprite limit reached."));
 			return null;
 		}
 
