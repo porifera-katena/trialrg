@@ -1,21 +1,12 @@
 package tracks.ruleGeneration.simEvoGenerator;
 
-import java.lang.Thread.State;
-import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Random;
-import java.util.Scanner;
 import java.util.stream.IntStream;
 
-import javax.naming.spi.DirStateFactory.Result;
-
 import core.game.Game;
-import core.game.Observation;
 import core.game.GameDescription.SpriteData;
 import core.game.SLDescription;
 import core.game.StateObservation;
@@ -43,7 +34,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 
 	private static int FEASIBILITY_STEP_LIMIT = 40;
 
-	private int EVOLUTION_NUM = 2;
+	private int EVOLUTION_NUM = Integer.MAX_VALUE;
 
 	private String[] interactions = new String[] { "killSprite", "killAll", "killIfHasMore", "killIfHasLess",
 			"killIfFromAbove", "killIfOtherHasMore", "spawnBehind", "stepBack", "spawnIfHasMore", "spawnIfHasLess",
@@ -65,7 +56,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 
 	@Override
 	public String[][] generateRules(SLDescription sl, ElapsedCpuTimer time) {
-		 Logger.getInstance().active = false;
+		Logger.getInstance().active = false;
 		ArrayList<String> interactions = new ArrayList<String>();
 		ArrayList<String> terminations = new ArrayList<String>();
 		SpriteData sprites[] = sl.getGameSprites();
@@ -101,9 +92,15 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			}
 			
 		}
-
+		
+		double worstTime = 0;
+		double avgTime = worstTime;
+		double totalTime = 0;
+		int numberOfIterations = 0;
 		for(int evo=0;evo<EVOLUTION_NUM;evo++) {
-			System.out.println("Generation : " + evo);
+			ElapsedCpuTimer timer = new ElapsedCpuTimer();
+			
+			System.out.println("Generation : " + numberOfIterations);
 			ArrayList<StateObservation> states = new ArrayList<StateObservation>();
 			for(int i=0;i<INTERACTION_NUM;i++) {
 				ArrayList<String> minusedInteraction = (ArrayList<String>) interactions.clone();
@@ -131,12 +128,29 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				});
 			}
 			ArrayList<ScoreData> scoreData = new ArrayList<ScoreData>();
-
+			
+			System.out.print("\nScore[");
 			for(int i=0;i<ITERATION;i++) {
 				scoreData.add(new ScoreData(i, scores[i]));
-				System.out.println("Scores = " + scores[i][0]);
+				System.out.print(scores[i][1]+"_"+ scores[i][0] + ", ");
 			}
+			System.out.println("]");
+			
+			Collections.shuffle(scoreData);//??
 			Collections.sort(scoreData);
+			
+			if(!(time.remainingTimeMillis() > 4 * avgTime && time.remainingTimeMillis() > worstTime)) {
+				int id = scoreData.get(ITERATION-1-1).id;
+				if(id<INTERACTION_NUM) {
+					interactions.remove(id);
+				}
+				else {
+					terminations.remove(id-INTERACTION_NUM+1);
+				}
+				String[][] rules = {toStringArray(interactions),toStringArray(terminations)};
+				return rules;
+			}
+			
 			for(int i=0;i<INTERACTION_WASTE;i++) {
 				int id = scoreData.get(ITERATION-i-1).id;
 				if(id<INTERACTION_NUM) {
@@ -151,10 +165,6 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				terminations.remove("");
 			}
 
-			if(false) {
-				String[][] rules = {toStringArray(interactions),toStringArray(terminations)};
-				return rules;
-			}
 
 			while(interactions.size()<INTERACTION_NUM) {
 				interactions.add(createInteraction(sprites));
@@ -170,7 +180,10 @@ public class RuleGenerator extends AbstractRuleGenerator{
 					terminations.remove(terminations.size()-1);
 				}
 			}
-
+			numberOfIterations++;
+			totalTime += timer.elapsedMillis();
+			avgTime = totalTime / numberOfIterations;
+			if(timer.elapsedMillis() > worstTime )worstTime = timer.elapsedMillis();
 		}
 		/*for(int i=0;i<INTERACTION_NUM;i++) {
 			//scoreData.add(new ScoreData(i, scores[i]));

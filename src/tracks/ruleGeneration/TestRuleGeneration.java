@@ -46,7 +46,7 @@ public class TestRuleGeneration {
      // Other settings
         boolean visuals = true;
         int seed = new Random().nextInt();
-        int gameIdx = 11;
+        int gameIdx = 0;
         int levelIdx = 1;
         
         String recordActionsFile = "actions/actions_" + games[gameIdx] + "_lvl" + levelIdx + "_" + seed + ".txt";
