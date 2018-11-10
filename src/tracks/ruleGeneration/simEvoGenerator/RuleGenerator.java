@@ -33,8 +33,12 @@ public class RuleGenerator extends AbstractRuleGenerator{
 
 	private Random random;
 
-	private int INTERACTION_NUM = 10;
-	private int INTERACTION_WASTE = 3;
+	private final int INTERACTION_NUM = 8;
+	private final int INTERACTION_WASTE = 3;
+	
+	private final int TERMINATION_NUM = 3;
+	
+	private int ITERATION;
 
 	private static int FEASIBILITY_STEP_LIMIT = 40;
 
@@ -50,7 +54,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 
 	public RuleGenerator(SLDescription sl, ElapsedCpuTimer time) {
 		this.random = new Random();
-
+		this.ITERATION = INTERACTION_NUM + TERMINATION_NUM - 1;
 		/*for(SpriteData s : sl.getGameSprites())
 			System.out.println(s);*/
 
@@ -73,9 +77,17 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				interactions.remove(interactions.size()-1);
 			}
 		}
+		while(terminations.size()<TERMINATION_NUM) {
+			terminations.add(createTermiination(sprites));
+			sl.testRules(toStringArray(interactions),toStringArray(terminations));
+			if(sl.getErrors().size()>0) {
+				terminations.remove(terminations.size()-1);
+			}
+		}
+		
 		ArrayList<SLDescription> SLs = new ArrayList<SLDescription>();
 
-		for(int i=0;i<INTERACTION_NUM;i++) {
+		for(int i=0;i<ITERATION;i++) {
 			VGDLFactory.GetInstance().init();
 			VGDLRegistry.GetInstance().init();
 
@@ -84,9 +96,9 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			try {
 				SLs.add(new SLDescription(toPlay, lines, SharedData.seed));
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
 		}
 
 		for(int evo=0;evo<EVOLUTION_NUM;evo++) {
@@ -97,33 +109,45 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				minusedInteraction.remove(i);
 				states.add(SLs.get(i).testRules(toStringArray(minusedInteraction), toStringArray(terminations)));
 			}
+			for(int i=1;i<TERMINATION_NUM;i++) {
+				ArrayList<String> minusedtermination = (ArrayList<String>) terminations.clone();
+				minusedtermination.remove(i);
+				states.add(SLs.get(i).testRules(toStringArray(interactions), toStringArray(minusedtermination)));
+			}
 			//double results[] = new double[states.size()];
 			//double fitness[] = new double[INTERACTION_NUM];
-			System.out.println(states.size() +"+"+ interactions.size());
+			System.out.println(states.size() +"="+ interactions.size() +"+"+ terminations.size() + "-1");
 
-			Double[][] scores = new Double[(INTERACTION_NUM)][];
+			Double[][] scores = new Double[(ITERATION)][];
 			if(feasibilityTest(sl, interactions, terminations)[0]<1.0) {
-				IntStream.range(0, interactions.size()).parallel().forEach(i -> {
+				IntStream.range(0, ITERATION).parallel().forEach(i -> {
 					scores[i] = feasibilityTest(states.get(i));
 				});
 			}
 			else {
-				IntStream.range(0, INTERACTION_NUM).parallel().forEach(i -> {
+				IntStream.range(0, ITERATION).parallel().forEach(i -> {
 					scores[i] = getFitness(states.get(i));
 				});
 			}
 			ArrayList<ScoreData> scoreData = new ArrayList<ScoreData>();
 
-			for(int i=0;i<INTERACTION_NUM;i++) {
+			for(int i=0;i<ITERATION;i++) {
 				scoreData.add(new ScoreData(i, scores[i]));
 				System.out.println("Scores = " + scores[i][0]);
 			}
 			Collections.sort(scoreData);
 			for(int i=0;i<INTERACTION_WASTE;i++) {
-				interactions.set(scoreData.get(i).id,""); 
+				int id = scoreData.get(i).id;
+				if(id<INTERACTION_NUM) {
+					interactions.set(id,"");
+				}
+				else {
+					terminations.set(id-INTERACTION_NUM+1,"");
+				}
 			}
 			for(int i=0;i<INTERACTION_WASTE;i++) {
 				interactions.remove(""); 
+				terminations.remove("");
 			}
 
 			if(false) {
@@ -136,6 +160,13 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				sl.testRules(toStringArray(interactions),toStringArray(terminations));
 				if(sl.getErrors().size()>0) {
 					interactions.remove(interactions.size()-1);
+				}
+			}
+			while(terminations.size()<TERMINATION_NUM) {
+				terminations.add(createTermiination(sprites));
+				sl.testRules(toStringArray(interactions),toStringArray(terminations));
+				if(sl.getErrors().size()>0) {
+					terminations.remove(terminations.size()-1);
 				}
 			}
 

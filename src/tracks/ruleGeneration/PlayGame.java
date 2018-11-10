@@ -52,13 +52,13 @@ public class PlayGame {
         String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx + ".txt";
         String recordGameFile = generateRulePath + games[gameIdx] + "_ggame.txt";
         
-        game = "examples/gridphysics/wildgunman";
+        game = "examples/gridphysics/boulderdash";
         //game = "examples/contphysics/mario";
         level1 = game + "_lvl1" + ".txt"; 
         //game = game + "_glvl.txt";
         game = game + ".txt";
-        //String game2 = "examples/generatedgame/boulderdash_ggame.txt";		
-		RuleGenMachine.playOneGame(game, game, level1, recordActionsFile, seed);
+        String game2 = "examples/generatedgame/boulderdash_ggame.txt";		
+		RuleGenMachine.playOneGame(game, game2, level1, recordActionsFile, seed);
 	}
 
 }
