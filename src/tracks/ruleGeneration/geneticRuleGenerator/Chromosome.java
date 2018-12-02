@@ -157,7 +157,6 @@ public class Chromosome implements Comparable<Chromosome>{
 			    interactionSet.add(newInteraction);
 			    // remove weird space from the arrayList
 			    interactionSet.removeIf(s -> s == null);
-			    while(interactionSet.remove(null));
 			    // stream the list back into itself to avoid duplicate rules from having been created
 				interactionSet = (ArrayList<String>) interactionSet.stream().distinct().collect(Collectors.toList());
 				// redefine the interaction array with the interaction array list
@@ -746,7 +745,6 @@ public class Chromosome implements Comparable<Chromosome>{
 					Event e = iter1.next();
 					events.add(e.activeTypeId + "" + e.passiveTypeId);
 				}
-				System.out.println("events = " + events);
 				score = -200;
 			}
 			 

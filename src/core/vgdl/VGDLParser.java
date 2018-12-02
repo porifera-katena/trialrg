@@ -76,28 +76,6 @@ public class VGDLParser {
 	 *            filename of the file containing the game
 	 * @return the game created
 	 */
-	public Game parseGame(String gamedesc_file,VGDLFactory vgdlFactory) {
-		String[] desc_lines = new IO().readFile(gamedesc_file);
-		if (desc_lines != null) {
-			Node rootNode = indentTreeParser(desc_lines);
-
-			// Parse here game and arguments of the first line
-			game = vgdlFactory.createGame((GameContent) rootNode.content);
-			game.initMulti();
-
-			// Parse the parameter nodes first, if any.
-			parseParameterNodes(rootNode);
-
-			// Parse the nodes.
-			try {
-				parseNodes(rootNode);
-			} catch (Exception e) {
-			    logger.addMessage(new Message(Message.ERROR, "[PARSE ERROR] " + e.toString()));
-			}
-		}
-
-		return game;
-	}
 	public Game parseGame(String gamedesc_file) {
 		String[] desc_lines = new IO().readFile(gamedesc_file);
 		if (desc_lines != null) {
@@ -529,16 +507,13 @@ public class VGDLParser {
 	 */
 	@SuppressWarnings("unchecked")
 	private void parseInteractionSet(ArrayList<Node> elements) throws Exception {
-		/*++*/
-		int id = 0;
 		for (Node n : elements) {
 			InteractionContent ic = (InteractionContent) n.content;
 			ic.lineNumber = n.lineNumber;
 			if (ic.is_definition) // === contains ">"
 			{
 				Effect ef = VGDLFactory.GetInstance().createEffect(game, ic);
-				ef.setId(id);
-				id++;
+
 				// Get the identifiers of the first sprite taking part in the
 				// effect.
 				int obj1 = VGDLRegistry.GetInstance().getRegisteredSpriteValue(ic.object1);

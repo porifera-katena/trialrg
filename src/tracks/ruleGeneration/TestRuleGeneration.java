@@ -2,12 +2,11 @@ package tracks.ruleGeneration;
 
 import java.util.Random;
 
-import tracks.ruleGeneration.simEvoGenerator.SharedData;
-
 /**
  * Created by dperez on 19/03/2017.
  */
 public class TestRuleGeneration {
+    //private int seed = 0;
     public static void main(String[] args) throws Exception {
 	//Available Controllers
 	String sampleMCTSController = "tracks.singlePlayer.advanced.sampleMCTS.Agent";
@@ -16,12 +15,11 @@ public class TestRuleGeneration {
         String randomRuleGenerator = "tracks.ruleGeneration.randomRuleGenerator.RuleGenerator";
         String constructiveRuleGenerator = "tracks.ruleGeneration.constructiveRuleGenerator.RuleGenerator";
         String geneticRuleGenerator = "tracks.ruleGeneration.geneticRuleGenerator.RuleGenerator";
-        String simEvoRuleGenerator = "tracks.ruleGeneration.simEvoGenerator.RuleGenerator";
 
         // Available games:
         String gamesPath = "examples/gridphysics/";
         String physicsGamesPath = "examples/contphysics/";
-        String generateRulePath = "examples/generatedgame/";
+        String generateRulePath = gamesPath;
 
         // All public games (gridphysics)
         String[] games = new String[]{"aliens", "angelsdemons", "assemblyline", "avoidgeorge", "bait", // 0-4
@@ -43,32 +41,30 @@ public class TestRuleGeneration {
                 "tercio", "thecitadel", "thesnowman", "waitforbreakfast", "watergame", // 80-84
                 "waves", "whackamole", "wildgunman", "witnessprotection", "wrapsokoban", // 85-89
                 "zelda", "zenpuzzle"}; // 90, 91
+
      // Other settings
         boolean visuals = true;
         int seed = new Random().nextInt();
         int gameIdx = 0;
-        int levelIdx = 1;
+        int levelIdx = 4;
         
-        String recordActionsFile = "actions/actions_" + games[gameIdx] + "_lvl" + levelIdx + "_" + seed + ".txt";
+        String recordActionsFile = "actions_" + games[gameIdx] + "_lvl" + levelIdx + "_" + seed + ".txt";
         // where to record the actions
         // executed. null if not to save.
-        
+
         
         
          // level names from 0 to 4 (game_lvlN.txt).
-        String game = gamesPath + games[gameIdx] + ".txt";
+        String game = generateRulePath + games[gameIdx] + ".txt";
         String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx + ".txt";
         String recordGameFile = generateRulePath + games[gameIdx] + "_ggame.txt";
-        
-        SharedData.gamefile = game;
-        SharedData.levelfile = level1;
-        SharedData.seed = seed;
 
         // 1. Generate rules (Interaction and Terminations) for a fixed level
-        if(RuleGenMachine.generateRules(SharedData.gamefile, SharedData.levelfile, simEvoRuleGenerator, recordGameFile, SharedData.seed)){
-            // RuleGenMachine.playOneGame(game, recordGameFile, level1, recordActionsFile, seed);
-            RuleGenMachine.runOneGame(SharedData.gamefile, recordGameFile, SharedData.levelfile, visuals, sampleMCTSController, recordActionsFile, SharedData.seed, 0);
+        if(RuleGenMachine.generateRules(game, level1, constructiveRuleGenerator, recordGameFile, seed)){
+             RuleGenMachine.playOneGame(game, recordGameFile, level1, recordActionsFile, seed);
+            //RuleGenMachine.runOneGame(game, recordGameFile, level1, visuals, sampleMCTSController, recordActionsFile, seed, 0);
         }
     }
+
 }
 
