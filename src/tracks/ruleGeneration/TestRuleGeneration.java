@@ -15,6 +15,7 @@ public class TestRuleGeneration {
         String randomRuleGenerator = "tracks.ruleGeneration.randomRuleGenerator.RuleGenerator";
         String constructiveRuleGenerator = "tracks.ruleGeneration.constructiveRuleGenerator.RuleGenerator";
         String geneticRuleGenerator = "tracks.ruleGeneration.geneticRuleGenerator.RuleGenerator";
+        String simEvoRuleGenerator = "tracks.ruleGeneration.simEvoRuleGenerator.RuleGenerator";
 
         // Available games:
         String gamesPath = "examples/gridphysics/";
@@ -45,7 +46,7 @@ public class TestRuleGeneration {
      // Other settings
         boolean visuals = true;
         int seed = new Random().nextInt();
-        int gameIdx = 1;
+        int gameIdx = 11;
         int levelIdx = 4;
         
         String recordActionsFile = "actions_" + games[gameIdx] + "_lvl" + levelIdx + "_" + seed + ".txt";
@@ -60,8 +61,8 @@ public class TestRuleGeneration {
         String recordGameFile = generateRulePath + games[gameIdx] + "_ggame.txt";
 
         // 1. Generate rules (Interaction and Terminations) for a fixed level
-        if(RuleGenMachine.generateRules(game, level1, constructiveRuleGenerator, recordGameFile, seed)){
-             RuleGenMachine.playOneGame(game, recordGameFile, level1, recordActionsFile, seed);
+        if(RuleGenMachine.generateRules(game, level1, simEvoRuleGenerator, recordGameFile, seed)){
+             //RuleGenMachine.playOneGame(game, recordGameFile, level1, recordActionsFile, seed);
             //RuleGenMachine.runOneGame(game, recordGameFile, level1, visuals, sampleMCTSController, recordActionsFile, seed, 0);
         }
     }
