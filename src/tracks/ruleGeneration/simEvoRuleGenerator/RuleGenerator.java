@@ -397,11 +397,11 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		
 		
 		String[][] rules = {toStringArray(interactions),toStringArray(terminations)};
-		Chromosome c = new Chromosome(rules,sl,0);
-		c.calculateFitness(0);
-		System.out.println(c.getFitness());
+		//Chromosome c = new Chromosome(rules,sl,0);
+		//c.calculateFitness(0);
+		//System.out.println(c.getFitness());
 		
-		return null;
+		return rules;
 	}
 	
 	private String createInteraction(ArrayList<String> usefulSprites) {
