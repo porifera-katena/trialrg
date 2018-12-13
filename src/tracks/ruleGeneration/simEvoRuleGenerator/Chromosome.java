@@ -764,6 +764,333 @@ public class Chromosome implements Comparable<Chromosome>{
 			// Random Agent
 			score = -200;
 			 
+			double randomScoreBest = -200.0;
+			double randomWinSum = 0.0;
+			StateObservation randomState = null;
+			int ActionTypeNum = stateObs.getAvailableActions().size() + 1;
+			for(int i=0; i<ActionTypeNum; i++){
+				StateObservation tempState = stateObs.copy();
+				int temp = 0;
+				if (i==0) {
+					temp = getAgentResult(tempState, bestSolutionSize, SharedData.randomAgent);
+				}
+				else {
+					temp = getSimpleResult(tempState, bestSolutionSize, stateObs.getAvailableActions().get(i-1));
+					
+				}
+				// add temp to framesCount
+				frameCount += temp;
+				randomState = tempState;
+				
+				score = randomState.getGameScore();
+				
+				
+				if(randomScoreBest < score) {
+					randomScoreBest = score;
+				}
+				//randomScoreSum += score;
+				if(randomState.getGameWinner() == Types.WINNER.PLAYER_WINS){
+					randomWinSum += 1;
+				} else if(randomState.getGameWinner() == Types.WINNER.NO_WINNER) {
+					randomWinSum += 0.5;
+				}
+				
+				// gather all unique interactions between objects in the naive agent
+				TreeSet s1 = randomState.getEventsHistory();
+				Iterator<Event> iter1 = s1.iterator();
+				while(iter1.hasNext()) {
+					Event e = iter1.next();
+					events.add(e.activeTypeId + "" + e.passiveTypeId);
+				}
+				score = -200;
+			}
+			
+			// Naive agent
+			score = -200;
+			StateObservation naiveState = null;
+			double naiveScoreSum = 0.0;
+			double naiveWinSum = 0.0;
+			//playing the game using the naive agent
+			for(int i=0; i<SharedData.REPETITION_AMOUNT; i++){
+				StateObservation tempState = stateObs.copy();
+				int temp = getAgentResult(tempState, bestSolutionSize, SharedData.naiveAgent);
+				// add temp to framesCount
+				frameCount += temp;
+				naiveState = tempState;
+				
+				score = naiveState.getGameScore();
+				if(score > -100) {
+					naiveScoreSum += score;
+					if(naiveState.getGameWinner() == Types.WINNER.PLAYER_WINS){
+						naiveWinSum += 1;
+					} else if(naiveState.getGameWinner() == Types.WINNER.NO_WINNER) {
+						naiveWinSum += 0.5;
+					}
+				}
+				
+				// gather all unique interactions between objects in the best agent
+				TreeSet s1 = naiveState.getEventsHistory();
+				Iterator<Event> iter1 = s1.iterator();
+				while(iter1.hasNext()) {
+					Event e = iter1.next();
+					events.add(e.activeTypeId + "" + e.passiveTypeId);
+					}
+				score = -200;
+			}
+			double badFramePercent = badFrames / (1.0 * frameCount);
+//			if(badFramePercent > .3) {
+//				// if we have bad frames, this is still not a good game
+//				constrainFitness += 0.3 * (1 - badFrames / (1.0 * frameCount));
+//				this.fitness.set(0, constrainFitness);
+//			}
+//			else {
+				// find average scores and wins across playthroughs
+				double avgBestScore = automatedScoreSum / SharedData.REPETITION_AMOUNT;
+				double avgNaiveScore = naiveScoreSum / SharedData.REPETITION_AMOUNT;
+				//double avgRandomScore = randomScoreSum / ActionTypeNum;
+				
+				double avgBestWin = automatedWinSum / SharedData.REPETITION_AMOUNT;
+				double avgNaiveWin = naiveWinSum / SharedData.REPETITION_AMOUNT;
+				double avgRandomWin = randomWinSum / ActionTypeNum;
+				
+				// calc sigmoid function with the score as "t"
+				double sigBest = 1 / (1 + Math.pow(Math.E, (0.1) * -avgBestScore));
+				double sigNaive = 1 / (1 + Math.pow(Math.E, (0.1) * -avgNaiveScore));
+				double sigRandom = 1 / (1 + Math.pow(Math.E, (0.1) * -randomScoreBest));
+				
+				// sum weighted win and sig-score values
+				double summedBest = 0.9 * avgBestWin + 0.1 * sigBest;
+				double summedNaive = 0.9 * avgNaiveWin + 0.1 * sigNaive;
+				double summedRandom = 0.9 * avgRandomWin + 0.1 * sigRandom;
+				
+				// calc game score differences
+				double gameScore = (summedBest - summedNaive) * (summedNaive - summedRandom);
+				System.out.print("("+summedBest+" - "+summedNaive+") * ("+summedNaive+" - "+summedRandom+")="+gameScore);
+				// allows rounding up due to weird scores
+				if(gameScore < -0.0005) {
+					
+					gameScore = 0;
+				}
+				// reward fitness for each unique interaction triggered
+				int uniqueCount = events.size();
+				// add a normalized unique count to the fitness
+				double rulesTriggered = uniqueCount / (ruleset[0].length * 1.0f + 1);
+				
+				// fitness is calculated by weight summing the 2 variables together
+				
+				double fitness = (gameScore + 1) * (rulesTriggered);
+				constrainFitness = 1.0;
+				this.fitness.set(0, constrainFitness);
+				this.fitness.set(1, fitness);
+		} 
+	}
+	
+public void calculateFitnessLight(long time) {
+		
+		// reset bad frames
+		this.badFrames = 0;
+		// unique events that occurred in all the game simulations
+		Set<String> events = new HashSet<String>();
+		StateObservation stateObs = feasibilityTest();
+		if(constrainFitness < 0.7) {
+			// failed feasibility
+			this.fitness.set(0, constrainFitness);
+		}
+		else {					
+			//Play the game using the best agent
+			double score = -200;
+			ArrayList<Vector2d> SOs = new ArrayList<>();
+			// protects the fitness evaluation from looping forever
+	
+			// big vars
+			// keeps track of total number of simulated frames
+			int frameCount = 0;
+			// Best Agent
+			double agentBestScore = Double.NEGATIVE_INFINITY;
+			double automatedScoreSum = 0.0;
+			double automatedWinSum = 0.0;
+			int bestSolutionSize = 0;
+			for(int i=0; i<SharedData.REPETITION_AMOUNT; i++){
+				StateObservation tempState = stateObs.copy();
+				cleanOpenloopAgents();
+				int temp = getAgentResult(tempState, SharedData.EVALUATION_STEP_COUNT, SharedData.automatedAgent);
+				// add temp to framesCount
+				frameCount += temp;
+				
+				if(tempState.getGameScore() > agentBestScore) {
+					agentBestScore = tempState.getGameScore();
+					bestState = tempState;
+					bestSolutionSize = temp;
+				}
+				
+				score = tempState.getGameScore();
+				automatedScoreSum += score;
+				if(tempState.getGameWinner() == Types.WINNER.PLAYER_WINS){
+					automatedWinSum += 1;
+				} else if(tempState.getGameWinner() == Types.WINNER.NO_WINNER) {
+					automatedWinSum += 0.5;
+				}
+				
+				TreeSet s1 = tempState.getEventsHistory();
+				Iterator<Event> iter1 = s1.iterator();
+				while(iter1.hasNext()) {
+					Event e = iter1.next();
+					events.add(e.activeTypeId + "" + e.passiveTypeId);
+				}
+				score = -200;
+			}
+			 
+			// Random Agent
+			score = -200;
+			 
+			double randomScoreBest = -200.0;
+			double randomWinSum = 0.0;
+			StateObservation randomState = null;
+			int ActionTypeNum = stateObs.getAvailableActions().size() + 1;
+			for(int i=0; i<ActionTypeNum; i++){
+				StateObservation tempState = stateObs.copy();
+				int temp = 0;
+				if (i==0) {
+					temp = getAgentResult(tempState, bestSolutionSize, SharedData.randomAgent);
+				}
+				else {
+					temp = getSimpleResult(tempState, bestSolutionSize, stateObs.getAvailableActions().get(i-1));
+					
+				}
+				// add temp to framesCount
+				frameCount += temp;
+				randomState = tempState;
+				
+				score = randomState.getGameScore();
+				
+				
+				if(randomScoreBest < score) {
+					randomScoreBest = score;
+				}
+				//randomScoreSum += score;
+				if(randomState.getGameWinner() == Types.WINNER.PLAYER_WINS){
+					randomWinSum += 1;
+				} else if(randomState.getGameWinner() == Types.WINNER.NO_WINNER) {
+					randomWinSum += 0.5;
+				}
+				
+				// gather all unique interactions between objects in the naive agent
+				TreeSet s1 = randomState.getEventsHistory();
+				Iterator<Event> iter1 = s1.iterator();
+				while(iter1.hasNext()) {
+					Event e = iter1.next();
+					events.add(e.activeTypeId + "" + e.passiveTypeId);
+				}
+				score = -200;
+			}
+			
+			double badFramePercent = badFrames / (1.0 * frameCount);
+//			if(badFramePercent > .3) {
+//				// if we have bad frames, this is still not a good game
+//				constrainFitness += 0.3 * (1 - badFrames / (1.0 * frameCount));
+//				this.fitness.set(0, constrainFitness);
+//			}
+//			else {
+				// find average scores and wins across playthroughs
+				double avgBestScore = automatedScoreSum / SharedData.REPETITION_AMOUNT;
+				//double avgNaiveScore = naiveScoreSum / SharedData.REPETITION_AMOUNT;
+				//double avgRandomScore = randomScoreSum / ActionTypeNum;
+				
+				double avgBestWin = automatedWinSum / SharedData.REPETITION_AMOUNT;
+				//double avgNaiveWin = naiveWinSum / SharedData.REPETITION_AMOUNT;
+				double avgRandomWin = randomWinSum / ActionTypeNum;
+				
+				// calc sigmoid function with the score as "t"
+				double sigBest = 1 / (1 + Math.pow(Math.E, (0.1) * -avgBestScore));
+				//double sigNaive = 1 / (1 + Math.pow(Math.E, (0.1) * -avgNaiveScore));
+				double sigRandom = 1 / (1 + Math.pow(Math.E, (0.1) * -randomScoreBest));
+				
+				// sum weighted win and sig-score values
+				double summedBest = 0.9 * avgBestWin + 0.1 * sigBest;
+				//double summedNaive = 0.9 * avgNaiveWin + 0.1 * sigNaive;
+				double summedRandom = 0.9 * avgRandomWin + 0.1 * sigRandom;
+				
+				// calc game score differences
+				double gameScore = (summedBest - summedRandom);
+				
+				// allows rounding up due to weird scores
+				/*if(gameScore > -0.0005) {
+					
+					gameScore = 0;
+				}*/
+				// reward fitness for each unique interaction triggered
+				int uniqueCount = events.size();
+				// add a normalized unique count to the fitness
+				double rulesTriggered = uniqueCount / (ruleset[0].length * 1.0f + 1);
+				
+				// fitness is calculated by weight summing the 2 variables together
+				
+				double fitness = (gameScore + 1) * (rulesTriggered);
+				constrainFitness = 1.0;
+				this.fitness.set(0, constrainFitness);
+				this.fitness.set(1, fitness);
+		} 
+	}
+
+	
+public void calculateFitness2(long time) {
+		
+		// reset bad frames
+		this.badFrames = 0;
+		// unique events that occurred in all the game simulations
+		Set<String> events = new HashSet<String>();
+		StateObservation stateObs = feasibilityTest();
+		if(constrainFitness < 0.7) {
+			// failed feasibility
+			this.fitness.set(0, constrainFitness);
+		}
+		else {					
+			//Play the game using the best agent
+			double score = -200;
+			ArrayList<Vector2d> SOs = new ArrayList<>();
+			// protects the fitness evaluation from looping forever
+	
+			// big vars
+			// keeps track of total number of simulated frames
+			int frameCount = 0;
+			// Best Agent
+			double agentBestScore = Double.NEGATIVE_INFINITY;
+			double automatedScoreSum = 0.0;
+			double automatedWinSum = 0.0;
+			int bestSolutionSize = 0;
+			for(int i=0; i<SharedData.REPETITION_AMOUNT; i++){
+				StateObservation tempState = stateObs.copy();
+				cleanOpenloopAgents();
+				int temp = getAgentResult(tempState, SharedData.EVALUATION_STEP_COUNT, SharedData.automatedAgent);
+				// add temp to framesCount
+				frameCount += temp;
+				
+				if(tempState.getGameScore() > agentBestScore) {
+					agentBestScore = tempState.getGameScore();
+					bestState = tempState;
+					bestSolutionSize = temp;
+				}
+				
+				score = tempState.getGameScore();
+				automatedScoreSum += score;
+				if(tempState.getGameWinner() == Types.WINNER.PLAYER_WINS){
+					automatedWinSum += 1;
+				} else if(tempState.getGameWinner() == Types.WINNER.NO_WINNER) {
+					automatedWinSum += 0.5;
+				}
+				
+				TreeSet s1 = tempState.getEventsHistory();
+				Iterator<Event> iter1 = s1.iterator();
+				while(iter1.hasNext()) {
+					Event e = iter1.next();
+					events.add(e.activeTypeId + "" + e.passiveTypeId);
+				}
+				score = -200;
+			}
+			 
+			// Random Agent
+			score = -200;
+			 
 			double randomScoreSum = 0.0;
 			double randomWinSum = 0.0;
 			StateObservation randomState = null;
@@ -872,6 +1199,9 @@ public class Chromosome implements Comparable<Chromosome>{
 				this.fitness.set(1, fitness);
 		} 
 	}
+
+	
+
 	/**
 	 * Play the current level using the naive player
 	 * @param stateObs	the current stateObservation object that represent the level
@@ -879,6 +1209,30 @@ public class Chromosome implements Comparable<Chromosome>{
 	 * @param agent		current agent to play the level
 	 * @return			the number of steps that the agent stops playing after (<= steps)
 	 */
+
+	public int getSimpleResult(StateObservation stateObs, int steps,Types.ACTIONS action) {
+		int i =0;
+		int k = 0;
+		for(i=0;i<steps;i++){
+			if(stateObs.isGameOver()){
+				break;
+			}
+			ElapsedCpuTimer timer = new ElapsedCpuTimer();
+			timer.setMaxTimeMillis(SharedData.EVALUATION_STEP_TIME);
+			Types.ACTIONS bestAction = action;
+			stateObs.advance(bestAction);
+			k += checkIfOffScreen(stateObs);
+
+		}
+		if(k > 0) {
+			// add k to global var keeping track of this
+			this.badFrames += k;
+		}
+		return i;
+	}
+	
+	
+	
 	private int getAgentResult(StateObservation stateObs, int steps, AbstractPlayer agent){
 		int i =0;
 		int k = 0;

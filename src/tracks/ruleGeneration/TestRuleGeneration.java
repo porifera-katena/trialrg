@@ -58,12 +58,13 @@ public class TestRuleGeneration {
          // level names from 0 to 4 (game_lvlN.txt).
         String game = generateRulePath + games[gameIdx] + ".txt";
         String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx + ".txt";
-        String recordGameFile = generateRulePath + games[gameIdx] + "_ggame.txt";
-
+        String recordGameFile = generateRulePath + games[gameIdx] + "_ggame_";
+        
         // 1. Generate rules (Interaction and Terminations) for a fixed level
-        if(RuleGenMachine.generateRules(game, level1, simEvoRuleGenerator, recordGameFile, seed)){
-             //RuleGenMachine.playOneGame(game, recordGameFile, level1, recordActionsFile, seed);
-            //RuleGenMachine.runOneGame(game, recordGameFile, level1, visuals, sampleMCTSController, recordActionsFile, seed, 0);
+        
+        for(int i=0;i<20;i++) {
+        	String record = recordGameFile+seed+i+".txt";
+        	RuleGenMachine.generateRules(game, level1, simEvoRuleGenerator, record, seed);
         }
     }
 

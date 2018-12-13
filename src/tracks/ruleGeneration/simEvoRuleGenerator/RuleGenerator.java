@@ -31,7 +31,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			"cloneSprite", "transformTo", "undoAll", "flipDirection", "transformToRandomChild", "updateSpawnType",
 			"removeScore", "addHealthPoints", "addHealthPointsToMax", "reverseDirection", "subtractHealthPoints",
 			"increaseSpeedToAll", "decreaseSpeedToAll", "attractGaze", "align", "turnAround", "wrapAround",
-			"pullWithIt", "bounceForward", "teleportToExit", "collectResource", "setSpeedForAll", "undoAll",
+			"pullWithIt", "bounceForward", "teleportToExit", "collectResource", "setSpeedForAll",// "undoAll",
 			"reverseDirection", "changeResource" };
 	/**
 	 * initialize the agents used during evaluating the chromosome
