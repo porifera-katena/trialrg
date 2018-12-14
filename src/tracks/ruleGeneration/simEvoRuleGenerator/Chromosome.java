@@ -938,6 +938,7 @@ public void calculateFitnessLight(long time) {
 					events.add(e.activeTypeId + "" + e.passiveTypeId);
 				}
 				score = -200;
+				System.out.print("O");
 			}
 			 
 			// Random Agent
@@ -982,6 +983,7 @@ public void calculateFitnessLight(long time) {
 					events.add(e.activeTypeId + "" + e.passiveTypeId);
 				}
 				score = -200;
+				System.out.print("R");
 			}
 			
 			double badFramePercent = badFrames / (1.0 * frameCount);
@@ -1014,10 +1016,10 @@ public void calculateFitnessLight(long time) {
 				double gameScore = (summedBest - summedRandom);
 				
 				// allows rounding up due to weird scores
-				/*if(gameScore > -0.0005) {
+				if(gameScore < -0.0005) {
 					
 					gameScore = 0;
-				}*/
+				}
 				// reward fitness for each unique interaction triggered
 				int uniqueCount = events.size();
 				// add a normalized unique count to the fitness

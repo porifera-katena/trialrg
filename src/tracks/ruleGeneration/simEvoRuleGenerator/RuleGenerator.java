@@ -360,24 +360,33 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		int numberOfIterations = 0;
 		
 		// START EVO LOOP
+		ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
 		Logger.getInstance().active = false;
 		while(time.remainingTimeMillis() > 4 * avgTime && time.remainingTimeMillis() > worstTime){
 			ElapsedCpuTimer timer = new ElapsedCpuTimer();
 			System.out.println("Generation #" + (numberOfIterations + 1) + ": ");
 			
-			ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
 			for (int i = 0; i < InteractionNum; i++) {
 				ArrayList<String> temp = new ArrayList<String>();
 				temp = (ArrayList<String>) interactions.clone();
 				temp.remove(i);
 				String[][] rules = {toStringArray(temp),toStringArray(terminations)};
 				Chromosome c = new Chromosome(rules,sl,i);
-				c.calculateFitness(SharedData.EVALUATION_TIME);
+				c.calculateFitnessLight(SharedData.EVALUATION_TIME);
 				chromosomes.add(c);
+				System.out.print("*");
 			}
+			
+			
+			
+			Collections.shuffle(chromosomes);
 			Collections.sort(chromosomes);
 			for(Chromosome c:chromosomes) {
-				System.out.print("["+c.getConstrainFitness()+","+c.getFitness().get(0)+","+c.getFitness().get(1)+"]");
+				System.out.print("[");
+				for(Double f:c.getFitness()) {
+					System.out.print(f+",");
+				}
+				System.out.print("]");
 			}
 			System.out.println();
 			
@@ -395,7 +404,16 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			avgTime = totalTime / numberOfIterations;
 		}
 		
+		for (int i = 0; i < 2; i++) {
+			interactions.set(chromosomes.get(InteractionNum-i).id, "");
+		}
 		
+		for(String s:interactions) {
+			System.out.println(s);
+		}
+		for(String s:terminations) {
+			System.out.println(s);
+		}
 		String[][] rules = {toStringArray(interactions),toStringArray(terminations)};
 		//Chromosome c = new Chromosome(rules,sl,0);
 		//c.calculateFitness(0);
