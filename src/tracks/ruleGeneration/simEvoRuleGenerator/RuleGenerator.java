@@ -12,6 +12,7 @@ import core.generator.AbstractRuleGenerator;
 import core.logging.Logger;
 import core.player.AbstractPlayer;
 import core.termination.Termination;
+import ontology.Types;
 import tools.ElapsedCpuTimer;
 import tools.LevelAnalyzer;
 
@@ -277,6 +278,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 	@Override
 	public String[][] generateRules(SLDescription sl, ElapsedCpuTimer time) {
 		SpriteData[] sprites = sl.getGameSprites();
+		
 		ArrayList<String> usefulSprites = new ArrayList<String>();
 		
 		String[][] currentLevel = sl.getCurrentLevel();
@@ -352,6 +354,9 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				sl.testRules(toStringArray(interactions),toStringArray(terminations));
 			}
 		}
+		for(Types.ACTIONS a:sl.testRules(toStringArray(interactions),toStringArray(terminations)).getAvailableActions()){
+			System.out.println("("+a+")");
+		}
 		
 		
 		double worstTime = 4 * SharedData.EVALUATION_TIME * SharedData.POPULATION_SIZE;
@@ -365,7 +370,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		while(time.remainingTimeMillis() > 4 * avgTime && time.remainingTimeMillis() > worstTime){
 			ElapsedCpuTimer timer = new ElapsedCpuTimer();
 			System.out.println("Generation #" + (numberOfIterations + 1) + ": ");
-			
+			chromosomes.clear();
 			for (int i = 0; i < InteractionNum; i++) {
 				ArrayList<String> temp = new ArrayList<String>();
 				temp = (ArrayList<String>) interactions.clone();

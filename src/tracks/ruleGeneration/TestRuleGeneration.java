@@ -66,6 +66,9 @@ public class TestRuleGeneration {
         	String record = recordGameFile+seed+i+".txt";
         	RuleGenMachine.generateRules(game, level1, simEvoRuleGenerator, record, seed);
         }
+        recordGameFile = generateRulePath + "boulderdash_ggame_-7866699101.txt";
+        RuleGenMachine.playOneGame(game, recordGameFile, level1, recordActionsFile, seed);
+        
     }
 
 }

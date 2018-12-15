@@ -947,15 +947,18 @@ public void calculateFitnessLight(long time) {
 			double randomScoreBest = -200.0;
 			double randomWinSum = 0.0;
 			StateObservation randomState = null;
-			int ActionTypeNum = stateObs.getAvailableActions().size() + 1;
+			int ActionTypeNum = stateObs.getAvailableActions().size() + 2;
 			for(int i=0; i<ActionTypeNum; i++){
 				StateObservation tempState = stateObs.copy();
 				int temp = 0;
 				if (i==0) {
 					temp = getAgentResult(tempState, bestSolutionSize, SharedData.randomAgent);
 				}
+				else if(i==1){
+					temp = getSimpleResult(tempState, bestSolutionSize, Types.ACTIONS.ACTION_NIL);
+				}
 				else {
-					temp = getSimpleResult(tempState, bestSolutionSize, stateObs.getAvailableActions().get(i-1));
+					temp = getSimpleResult(tempState, bestSolutionSize, stateObs.getAvailableActions().get(i-2));
 					
 				}
 				// add temp to framesCount
