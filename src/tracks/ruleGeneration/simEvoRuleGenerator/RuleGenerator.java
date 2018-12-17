@@ -296,7 +296,30 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				}
 			}
 		}
+		
+		boolean flag = true;
+		while(flag) {
+			flag = false;
+			for(SpriteData s : sprites) {
+				if(usefulSprites.contains(s.name)) {
+					String[] parameters = s.toString().split(" ",0);
+					for(String p:parameters) {
+						if(p.matches(".*stype=.*")) {
+							p = p.replace("stype=", "");
+							if(!usefulSprites.contains(p)) {
+								usefulSprites.add(p);
+								flag = true;
+							}
+						}
+					}
+				}
+			}
+		}
 		usefulSprites.add("EOS");
+		
+		for(String s:usefulSprites) {
+			System.out.println(s);
+		}
 		
 		ArrayList<SpriteData> avatar = new ArrayList<SpriteData>();
 		ArrayList<SpriteData> door = new ArrayList<SpriteData>();
@@ -363,29 +386,39 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		double avgTime = worstTime;
 		double totalTime = 0;
 		int numberOfIterations = 0;
+		int mutatedInteractions[] = {-1,-1};
 		
 		// START EVO LOOP
 		ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
+		ArrayList<Chromosome> newChromosomes = new ArrayList<Chromosome>();
 		Logger.getInstance().active = false;
 		while(time.remainingTimeMillis() > 4 * avgTime && time.remainingTimeMillis() > worstTime){
 			ElapsedCpuTimer timer = new ElapsedCpuTimer();
 			System.out.println("Generation #" + (numberOfIterations + 1) + ": ");
 			chromosomes.clear();
 			for (int i = 0; i < InteractionNum; i++) {
-				ArrayList<String> temp = new ArrayList<String>();
-				temp = (ArrayList<String>) interactions.clone();
-				temp.remove(i);
-				String[][] rules = {toStringArray(temp),toStringArray(terminations)};
-				Chromosome c = new Chromosome(rules,sl,i);
-				c.calculateFitnessLight(SharedData.EVALUATION_TIME);
-				chromosomes.add(c);
-				System.out.print("*");
+				if(mutatedInteractions[0]!=i && mutatedInteractions[1]!=i) {
+					ArrayList<String> temp = new ArrayList<String>();
+					temp = (ArrayList<String>) interactions.clone();
+					temp.remove(i);
+					String[][] rules = {toStringArray(temp),toStringArray(terminations)};
+					Chromosome c = new Chromosome(rules,sl,i);
+					c.calculateFitnessLight(SharedData.EVALUATION_TIME);
+					chromosomes.add(c);
+					System.out.print("*");
+				}
 			}
-			
-			
+			System.out.println();
+			for (Chromosome c : newChromosomes) {
+				chromosomes.add(c);
+			}
 			
 			Collections.shuffle(chromosomes);
 			Collections.sort(chromosomes);
+			for(int i=0;i<2;i++) {
+				mutatedInteractions[i] = chromosomes.get(i).id;
+			}
+			
 			for(Chromosome c:chromosomes) {
 				System.out.print("[");
 				for(Double f:c.getFitness()) {
@@ -394,23 +427,38 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				System.out.print("]");
 			}
 			System.out.println();
-			
+			/******************************/
+			newChromosomes.clear();
 			for (int i = 0; i < 2; i++) {
-				interactions.set(chromosomes.get(i).id, createInteraction(usefulSprites));
-				sl.testRules(toStringArray(interactions),toStringArray(terminations));
-				while(sl.getErrors().size() > 0){
-					interactions.set(chromosomes.get(InteractionNum-i).id, createInteraction(usefulSprites));
+				Chromosome c = null;
+				Chromosome worst;
+				do {
+					System.out.print(i);
+					worst = chromosomes.get(InteractionNum-1);
+					interactions.set(mutatedInteractions[i], createInteraction(usefulSprites));
 					sl.testRules(toStringArray(interactions),toStringArray(terminations));
-				}
+					while(sl.getErrors().size() > 0){
+						interactions.set(mutatedInteractions[i], createInteraction(usefulSprites));
+						sl.testRules(toStringArray(interactions),toStringArray(terminations));
+					}
+					ArrayList<String> temp = new ArrayList<String>();
+					temp = (ArrayList<String>) interactions.clone();
+					temp.remove(mutatedInteractions[(i+1)%2]);
+					String[][] rules = {toStringArray(temp),toStringArray(terminations)};
+					c = new Chromosome(rules,sl,i);
+					c.calculateFitnessLight(SharedData.EVALUATION_TIME);
+					System.out.print("c="+worst.compareTo(c)+" ");
+				} while (worst.compareTo(c)<0);
+				newChromosomes.add(c);
 			}
-			
+			/***********************/
 			numberOfIterations += 1;
 			totalTime += timer.elapsedMillis();
 			avgTime = totalTime / numberOfIterations;
 		}
 		
-		for (int i = 0; i < 2; i++) {
-			interactions.set(chromosomes.get(InteractionNum-i).id, "");
+		for (int i = 0; i < 1; i++) {
+			interactions.set(chromosomes.get(i).id, "");
 		}
 		
 		for(String s:interactions) {
@@ -511,6 +559,17 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		System.out.println(numOfFeasible);
 		System.out.println(numOfInFeasible);
 		return fChromosomes.get(0).getRuleset();
+		
+		::
+		:
+		:
+		::
+		:
+		::
+		
+		
+		
+		
 	}*/
 	private String[] toStringArray(ArrayList<String> arlist) {
 		String[] str = new String[arlist.size()];
