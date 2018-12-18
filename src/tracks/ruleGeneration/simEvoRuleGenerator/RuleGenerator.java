@@ -377,9 +377,9 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				sl.testRules(toStringArray(interactions),toStringArray(terminations));
 			}
 		}
-		for(Types.ACTIONS a:sl.testRules(toStringArray(interactions),toStringArray(terminations)).getAvailableActions()){
+		/*for(Types.ACTIONS a:sl.testRules(toStringArray(interactions),toStringArray(terminations)).getAvailableActions()){
 			System.out.println("("+a+")");
-		}
+		}*/
 		
 		
 		double worstTime = 4 * SharedData.EVALUATION_TIME * SharedData.POPULATION_SIZE;
@@ -445,11 +445,16 @@ public class RuleGenerator extends AbstractRuleGenerator{
 					temp = (ArrayList<String>) interactions.clone();
 					temp.remove(mutatedInteractions[(i+1)%2]);
 					String[][] rules = {toStringArray(temp),toStringArray(terminations)};
-					c = new Chromosome(rules,sl,i);
+					c = new Chromosome(rules,sl,mutatedInteractions[(i+1)%2]);
 					c.calculateFitnessLight(SharedData.EVALUATION_TIME);
 					System.out.print("c="+worst.compareTo(c)+" ");
 				} while (worst.compareTo(c)<0);
 				newChromosomes.add(c);
+				System.out.print("{");
+				for(Double f:c.getFitness()) {
+					System.out.print(f+",");
+				}
+				System.out.print("}");
 			}
 			/***********************/
 			numberOfIterations += 1;

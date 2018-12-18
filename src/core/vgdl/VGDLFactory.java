@@ -445,7 +445,7 @@ public class VGDLFactory
                     return ((Integer)objVal).intValue();
                 }catch(Exception e)
                 {
-                    System.out.println("ERROR: invalid requested int parameter " + fieldName);
+                    //System.out.println("ERROR: invalid requested int parameter " + fieldName);
                     return -1;
                 }
             }
