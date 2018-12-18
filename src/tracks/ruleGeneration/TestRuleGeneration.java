@@ -64,7 +64,7 @@ public class TestRuleGeneration {
         // 1. Generate rules (Interaction and Terminations) for a fixed level
         
         
-        String record = recordGameFile+seed+".txt";
+        String record = recordGameFile+seed+"const.txt";
     	RuleGenMachine.generateRules(game, level1, constructiveRuleGenerator, record, seed);
         for(int i=0;i<5;i++) {
         	seed = random.nextInt();
@@ -72,7 +72,8 @@ public class TestRuleGeneration {
         	RuleGenMachine.generateRules(game, level1, simEvoRuleGenerator, record, seed);
         }
         recordGameFile = generateRulePath + "boulderdash_ggame_-7866699101.txt";
-        RuleGenMachine.playOneGame(game, recordGameFile, level1, recordActionsFile, seed);
+        RuleGenMachine.playOneGame(game, recordG
+        		ameFile, level1, recordActionsFile, seed);
         
     }
 
