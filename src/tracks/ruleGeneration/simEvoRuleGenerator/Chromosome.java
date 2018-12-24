@@ -11,6 +11,8 @@ import ontology.Types;
 import tools.ElapsedCpuTimer;
 import tools.LevelAnalyzer;
 import tools.Vector2d;
+
+import java.io.ObjectInputStream.GetField;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,25 +25,25 @@ public class Chromosome implements Comparable<Chromosome>{
 	/**
 	 * current chromosome fitness if its a feasible
 	 */
-	
+
 	public int id = 0;
-	
+
 	private ArrayList<Double> fitness;
 	/**
 	 * current chromosome fitness if its an infeasible
 	 */
 	private double constrainFitness;
-	
+
 	/**
 	 * keeps track of how many bad frames there are during playthoughs
 	 */
 	private int badFrames;
-	
+
 	/*
 	 * contains how many errors came out of the build test
 	 */
 	private int errorCount;
-	
+
 	/**
 	 * the ruleset this chromosome contains
 	 */
@@ -63,7 +65,7 @@ public class Chromosome implements Comparable<Chromosome>{
 	StateObservation doNothingState;
 	StateObservation bestState;
 	ArrayList<Types.ACTIONS> bestSol;
-	
+
 	/**
 	 * Chromosome constructor.  Holds the ruleset and initializes agents within
 	 * @param ruleset	the ruleset the chromosome contains
@@ -71,12 +73,13 @@ public class Chromosome implements Comparable<Chromosome>{
 	 * @param time		elapsed time
 	 */
 
-	
+
 	public Chromosome(String[][] ruleset, SLDescription sl,int _id) {
 		this.id = _id;
 		this.ruleset = ruleset;
 		this.sl = sl;
 		this.fitness = new ArrayList<Double>();
+		fitness.add(0.0);
 		fitness.add(0.0);
 		fitness.add(0.0);
 		this.badFrames = 0;
@@ -85,6 +88,7 @@ public class Chromosome implements Comparable<Chromosome>{
 		this.ruleset = ruleset;
 		this.sl = sl;
 		this.fitness = new ArrayList<Double>();
+		fitness.add(0.0);
 		fitness.add(0.0);
 		fitness.add(0.0);
 		this.badFrames = 0;
@@ -127,7 +131,7 @@ public class Chromosome implements Comparable<Chromosome>{
 				// insert a new parameter into it
 				String nParam = SharedData.interactionParams[SharedData.random.nextInt(SharedData.interactionParams.length)];
 				nParam += "=";
-				
+
 				// there are two types of parameters, ones that take sprites and ones that take values
 				if(nParam.equals("scoreChange=") || nParam.equals("limit=") || nParam.equals("value=") || nParam.equals("geq=")
 						|| nParam.equals("leq=")) {
@@ -145,16 +149,16 @@ public class Chromosome implements Comparable<Chromosome>{
 			else {
 				String nInteraction = SharedData.interactions[SharedData.random.nextInt(SharedData.interactions.length)];
 				int i1 = SharedData.random.nextInt(SharedData.usefulSprites.size());
-			    int i2 = (i1 + 1 + SharedData.random.nextInt(SharedData.usefulSprites.size() - 1)) % SharedData.usefulSprites.size();
-			    
-			    String newInteraction = SharedData.usefulSprites.get(i1) + " " + SharedData.usefulSprites.get(i2) + " > " + nInteraction;
-			    // roll to see if you insert a parameter into this interaction
-			    roll = SharedData.random.nextDouble();
-			    
-			    if(roll < SharedData.INSERT_PARAM_PROB) {
-			    	String nParam = SharedData.interactionParams[SharedData.random.nextInt(SharedData.interactionParams.length)];
+				int i2 = (i1 + 1 + SharedData.random.nextInt(SharedData.usefulSprites.size() - 1)) % SharedData.usefulSprites.size();
+
+				String newInteraction = SharedData.usefulSprites.get(i1) + " " + SharedData.usefulSprites.get(i2) + " > " + nInteraction;
+				// roll to see if you insert a parameter into this interaction
+				roll = SharedData.random.nextDouble();
+
+				if(roll < SharedData.INSERT_PARAM_PROB) {
+					String nParam = SharedData.interactionParams[SharedData.random.nextInt(SharedData.interactionParams.length)];
 					nParam += "=";
-					
+
 					// there are two types of parameters, ones that take sprites and ones that take values
 					if(nParam.equals("scoreChange=") || nParam.equals("limit=") || nParam.equals("value=") || nParam.equals("geq=")
 							|| nParam.equals("leq=")) {
@@ -165,12 +169,12 @@ public class Chromosome implements Comparable<Chromosome>{
 						nParam += nSprite;
 					}
 					newInteraction += " " + nParam;
-			    }
-			    // add the new interaction to the interaction set
-			    interactionSet.add(newInteraction);
-			    // remove weird space from the arrayList
-			    interactionSet.removeIf(s -> s == null);
-			    // stream the list back into itself to avoid duplicate rules from having been created
+				}
+				// add the new interaction to the interaction set
+				interactionSet.add(newInteraction);
+				// remove weird space from the arrayList
+				interactionSet.removeIf(s -> s == null);
+				// stream the list back into itself to avoid duplicate rules from having been created
 				interactionSet = (ArrayList<String>) interactionSet.stream().distinct().collect(Collectors.toList());
 				// redefine the interaction array with the interaction array list
 				ruleset[0] = new String[interactionSet.size()];
@@ -196,7 +200,7 @@ public class Chromosome implements Comparable<Chromosome>{
 				}
 				// if no params do nothing
 				if(params.size() == 0) {
-					
+
 				} 
 				// if one param, remove it
 				else if(params.size() == 1) {
@@ -219,9 +223,9 @@ public class Chromosome implements Comparable<Chromosome>{
 					}
 					interactionSet.set(point, fixedRule);
 				}
-			    // remove weird space from the arrayList
-			    interactionSet.removeIf(s -> s == null);
-			    // stream the list back into itself to avoid duplicate rules from having been created
+				// remove weird space from the arrayList
+				interactionSet.removeIf(s -> s == null);
+				// stream the list back into itself to avoid duplicate rules from having been created
 				interactionSet = (ArrayList<String>) interactionSet.stream().distinct().collect(Collectors.toList());
 				// redefine the interaction array with the interaction array list
 				ruleset[0] = new String[interactionSet.size()];
@@ -234,9 +238,9 @@ public class Chromosome implements Comparable<Chromosome>{
 				if (interactionSet.size() > 1) {
 					interactionSet.remove(point);
 				}
-			    // remove weird space from the arrayList
-			    interactionSet.removeIf(s -> s == null);
-			    // stream the list back into itself to avoid duplicate rules from having been created
+				// remove weird space from the arrayList
+				interactionSet.removeIf(s -> s == null);
+				// stream the list back into itself to avoid duplicate rules from having been created
 				interactionSet = (ArrayList<String>) interactionSet.stream().distinct().collect(Collectors.toList());
 				// redefine the interaction array with the interaction array list
 				ruleset[0] = new String[interactionSet.size()];
@@ -247,7 +251,7 @@ public class Chromosome implements Comparable<Chromosome>{
 		else if (mutationType < SharedData.MODIFY_RULE_PROB + SharedData.DELETION_PROB + SharedData.INSERTION_PROB) {
 			// pick our modified rule
 			int point = SharedData.random.nextInt(interactionSet.size());
-			
+
 			// roll to see what kind of modification, either a rule change or a parameter change
 			double roll = SharedData.random.nextDouble();
 			// modify a parameter of a rule completely
@@ -264,7 +268,7 @@ public class Chromosome implements Comparable<Chromosome>{
 				}
 				// if no params do nothing
 				if(ps.size() == 0) {
-					
+
 				} else {
 					// pick one of the rules and don't include it, but include the others
 					int rule = SharedData.random.nextInt(ps.size());
@@ -286,15 +290,15 @@ public class Chromosome implements Comparable<Chromosome>{
 								String nSprite = SharedData.usefulSprites.get(SharedData.random.nextInt(SharedData.usefulSprites.size()));
 								nParam += nSprite;
 							}
-							
+
 							fixedRule += nParam + " ";
 						}
 					}
 					interactionSet.set(point, fixedRule);
 				}
-			    // remove weird space from the arrayList
-			    interactionSet.removeIf(s -> s == null);
-			    // stream the list back into itself to avoid duplicate rules from having been created
+				// remove weird space from the arrayList
+				interactionSet.removeIf(s -> s == null);
+				// stream the list back into itself to avoid duplicate rules from having been created
 				interactionSet = (ArrayList<String>) interactionSet.stream().distinct().collect(Collectors.toList());
 				// redefine the interaction array with the interaction array list
 				ruleset[0] = new String[interactionSet.size()];
@@ -304,7 +308,7 @@ public class Chromosome implements Comparable<Chromosome>{
 			else {
 				String newRule = SharedData.interactions[SharedData.random.nextInt(SharedData.interactions.length)];
 				String modRule = ruleset[0][point];
-				
+
 				String[] splitModRule = modRule.split("\\s+");
 				// replace old rule with new one
 				splitModRule[3] = newRule;
@@ -356,20 +360,20 @@ public class Chromosome implements Comparable<Chromosome>{
 				addToMe += " " + nParam;
 				// replace the old rule with the modified one
 				ruleset[1][point] = addToMe;
-				
+
 				// DEBUG CODE loop through terminations and find a bug
 				for(int i = 0; i < this.ruleset[1].length; i++) {
 					if(ruleset[1][i].contains("limit= ")) {
 						System.out.println("Broken");
 					}
-				
+
 				}
 			}
 			// insert an entirely new rule, possibly with a parameter in it
 			else {
 				String nTermination = SharedData.terminations[SharedData.random.nextInt(SharedData.terminations.length)];    
-				
-				
+
+
 				// roll to see if we include a parameter from the termination parameter set
 				double roll1 = SharedData.random.nextDouble();
 				if(roll < SharedData.INSERT_PARAM_PROB) {
@@ -380,12 +384,12 @@ public class Chromosome implements Comparable<Chromosome>{
 					// insert a sprite
 					String nSprite = SharedData.usefulSprites.get(SharedData.random.nextInt(SharedData.usefulSprites.size()));
 					nParam += nSprite;
-					
+
 					nTermination+= " " + nParam;
 				}
 				// add win and limit
 				nTermination += " win=";
-				
+
 				double roll2 = SharedData.random.nextDouble();
 				if(roll2 < SharedData.WIN_PARAM_PROB){
 					nTermination += "True";
@@ -400,23 +404,23 @@ public class Chromosome implements Comparable<Chromosome>{
 					int val = SharedData.random.nextInt(SharedData.TERMINATION_LIMIT_PARAM);
 					nTermination += " limit="+val;
 				}
-			    // add the new termination to the termination set
-			    terminationSet.add(nTermination);
-			    // remove weird space from the arrayList
-			    terminationSet.removeIf(s -> s == null);
-			    // stream the list back into itself to avoid duplicate rules from having been created
+				// add the new termination to the termination set
+				terminationSet.add(nTermination);
+				// remove weird space from the arrayList
+				terminationSet.removeIf(s -> s == null);
+				// stream the list back into itself to avoid duplicate rules from having been created
 				terminationSet = (ArrayList<String>) terminationSet.stream().distinct().collect(Collectors.toList());
 				// redefine the termination array with the termination array list
 				ruleset[1] = new String[terminationSet.size()];
 				ruleset[1] = terminationSet.toArray(ruleset[1]);
-				
-				
+
+
 				// DEBUG CODE loop through terminations and find a bug
 				for(int i = 0; i < this.ruleset[1].length; i++) {
 					if(ruleset[1][i].contains("limit= ")) {
 						System.out.println("Broken");
 					}
-				
+
 				}
 			}
 		} 
@@ -440,7 +444,7 @@ public class Chromosome implements Comparable<Chromosome>{
 				}
 				// if no params do nothing
 				if(params.size() == 0) {
-					
+
 				} 
 				else {
 					// pick one of the rules and don't include it, but include the others
@@ -453,20 +457,20 @@ public class Chromosome implements Comparable<Chromosome>{
 					}
 					terminationSet.set(point, fixedRule);
 				}
-			    // remove weird space from the arrayList
+				// remove weird space from the arrayList
 				terminationSet.removeIf(s -> s == null);
-			    // stream the list back into itself to avoid duplicate rules from having been created
+				// stream the list back into itself to avoid duplicate rules from having been created
 				terminationSet = (ArrayList<String>) terminationSet.stream().distinct().collect(Collectors.toList());
 				// redefine the interaction array with the interaction array list
 				ruleset[1] = new String[terminationSet.size()];
 				ruleset[1] = terminationSet.toArray(ruleset[1]);
-				
+
 				// DEBUG CODE loop through terminations and find a bug
 				for(int i = 0; i < this.ruleset[1].length; i++) {
 					if(ruleset[1][i].contains("limit= ")) {
 						System.out.println("Broken");
 					}
-				
+
 				}
 			}
 			// delete an entire rule from the interaction set
@@ -476,20 +480,20 @@ public class Chromosome implements Comparable<Chromosome>{
 				if (terminationSet.size() > 1) {
 					terminationSet.remove(point);
 				}
-			    // remove weird space from the arrayList
+				// remove weird space from the arrayList
 				terminationSet.removeIf(s -> s == null);
-			    // stream the list back into itself to avoid duplicate rules from having been created
+				// stream the list back into itself to avoid duplicate rules from having been created
 				terminationSet = (ArrayList<String>) terminationSet.stream().distinct().collect(Collectors.toList());
 				// redefine the interaction array with the interaction array list
 				ruleset[1] = new String[terminationSet.size()];
 				ruleset[1] = terminationSet.toArray(ruleset[1]);
-				
+
 				// DEBUG CODE loop through terminations and find a bug
 				for(int i = 0; i < this.ruleset[1].length; i++) {
 					if(ruleset[1][i].contains("limit= ")) {
 						System.out.println("Broken");
 					}
-				
+
 				}
 			}
 		} 
@@ -497,7 +501,7 @@ public class Chromosome implements Comparable<Chromosome>{
 		else if (mutationType < SharedData.MODIFY_RULE_PROB + SharedData.DELETION_PROB + SharedData.INSERTION_PROB) {
 			// pick our modified rule
 			int point = SharedData.random.nextInt(terminationSet.size());
-			
+
 			// roll to see what kind of modification, either a rule change or a parameter change
 			double roll = SharedData.random.nextDouble();
 			// modify a parameter of a rule completely
@@ -515,7 +519,7 @@ public class Chromosome implements Comparable<Chromosome>{
 				}
 				// if no params do nothing
 				if(ps.size() == 0) {
-					
+
 				} else {
 					// pick one of the rules and don't include it, but include the others
 					int rule = SharedData.random.nextInt(ps.size());
@@ -560,27 +564,27 @@ public class Chromosome implements Comparable<Chromosome>{
 					}
 					terminationSet.set(point, fixedRule);
 				}
-			    // remove weird space from the arrayList
+				// remove weird space from the arrayList
 				terminationSet.removeIf(s -> s == null);
-			    // stream the list back into itself to avoid duplicate rules from having been created
+				// stream the list back into itself to avoid duplicate rules from having been created
 				terminationSet = (ArrayList<String>) terminationSet.stream().distinct().collect(Collectors.toList());
 				// redefine the interaction array with the interaction array list
 				ruleset[1] = new String[terminationSet.size()];
 				ruleset[1] = terminationSet.toArray(ruleset[1]);
-				
+
 				// DEBUG CODE loop through terminations and find a bug
 				for(int i = 0; i < this.ruleset[1].length; i++) {
 					if(ruleset[1][i].contains("limit= ")) {
 						System.out.println("Broken");
 					}
-				
+
 				}
 			} 
 			// modify a rule, but leave the parameters and sprites
 			else {
 				String newRule = SharedData.terminations[SharedData.random.nextInt(SharedData.terminations.length)];
 				String modRule = ruleset[1][point];
-				
+
 				String[] splitModRule = modRule.split("\\s+");
 				// replace old rule with new one
 				splitModRule[0] = newRule;
@@ -589,13 +593,13 @@ public class Chromosome implements Comparable<Chromosome>{
 					newRule += part + " ";
 				}
 				ruleset[1][point] = newRule;
-				
+
 				// DEBUG CODE loop through terminations and find a bug
 				for(int i = 0; i < this.ruleset[1].length; i++) {
 					if(ruleset[1][i].contains("limit= ")) {
 						System.out.println("Broken");
 					}
-				
+
 				}
 			}
 		} 
@@ -603,7 +607,7 @@ public class Chromosome implements Comparable<Chromosome>{
 		else {
 			System.err.println("What?! Howd we even get here!?");
 		}
-		
+
 
 	}
 	/**
@@ -634,7 +638,7 @@ public class Chromosome implements Comparable<Chromosome>{
 
 		// read the cleanser back into the ruleset
 		ruleset[0] = cleanser.toArray(ruleset[0]);
-		
+
 		// read the termination set into the Set cleanser
 		cleanser = new HashSet<String>();
 		for(int i = 0; i < ruleset[1].length; i++) {
@@ -643,7 +647,7 @@ public class Chromosome implements Comparable<Chromosome>{
 		ruleset[1] = new String[0];
 		// read the cleanser back into the ruleset
 		ruleset[1] = cleanser.toArray(ruleset[1]);
-		
+
 		// check termination set for an end if player dies
 		boolean hasCondition = false;
 		SpriteData[] avatarName = SharedData.la.getAvatars(false);
@@ -694,20 +698,20 @@ public class Chromosome implements Comparable<Chromosome>{
 				}
 			}
 			constrainFitness += 0.2 * (doNothingLength / (40.0));
-			
+
 			this.fitness.set(0, constrainFitness);
 
 		}
 		return state;
 	}
-	
-	
+
+
 	/**
 	 * calculates the fitness, by comparing the scores of a naiveAI and a smart AI
 	 * @param time	how much time to evaluate the chromosome
-	 */
+	 *//*
 	public void calculateFitness(long time) {
-		
+
 		// reset bad frames
 		this.badFrames = 0;
 		// unique events that occurred in all the game simulations
@@ -722,7 +726,7 @@ public class Chromosome implements Comparable<Chromosome>{
 			double score = -200;
 			ArrayList<Vector2d> SOs = new ArrayList<>();
 			// protects the fitness evaluation from looping forever
-	
+
 			// big vars
 			// keeps track of total number of simulated frames
 			int frameCount = 0;
@@ -737,13 +741,13 @@ public class Chromosome implements Comparable<Chromosome>{
 				int temp = getAgentResult(tempState, SharedData.EVALUATION_STEP_COUNT, SharedData.automatedAgent);
 				// add temp to framesCount
 				frameCount += temp;
-				
+
 				if(tempState.getGameScore() > agentBestScore) {
 					agentBestScore = tempState.getGameScore();
 					bestState = tempState;
 					bestSolutionSize = temp;
 				}
-				
+
 				score = tempState.getGameScore();
 				automatedScoreSum += score;
 				if(tempState.getGameWinner() == Types.WINNER.PLAYER_WINS){
@@ -751,7 +755,7 @@ public class Chromosome implements Comparable<Chromosome>{
 				} else if(tempState.getGameWinner() == Types.WINNER.NO_WINNER) {
 					automatedWinSum += 0.5;
 				}
-				
+
 				TreeSet s1 = tempState.getEventsHistory();
 				Iterator<Event> iter1 = s1.iterator();
 				while(iter1.hasNext()) {
@@ -760,10 +764,10 @@ public class Chromosome implements Comparable<Chromosome>{
 				}
 				score = -200;
 			}
-			 
+
 			// Random Agent
 			score = -200;
-			 
+
 			double randomScoreBest = -200.0;
 			double randomWinSum = 0.0;
 			StateObservation randomState = null;
@@ -776,15 +780,15 @@ public class Chromosome implements Comparable<Chromosome>{
 				}
 				else {
 					temp = getSimpleResult(tempState, bestSolutionSize, stateObs.getAvailableActions().get(i-1));
-					
+
 				}
 				// add temp to framesCount
 				frameCount += temp;
 				randomState = tempState;
-				
+
 				score = randomState.getGameScore();
-				
-				
+
+
 				if(randomScoreBest < score) {
 					randomScoreBest = score;
 				}
@@ -794,7 +798,7 @@ public class Chromosome implements Comparable<Chromosome>{
 				} else if(randomState.getGameWinner() == Types.WINNER.NO_WINNER) {
 					randomWinSum += 0.5;
 				}
-				
+
 				// gather all unique interactions between objects in the naive agent
 				TreeSet s1 = randomState.getEventsHistory();
 				Iterator<Event> iter1 = s1.iterator();
@@ -804,7 +808,7 @@ public class Chromosome implements Comparable<Chromosome>{
 				}
 				score = -200;
 			}
-			
+
 			// Naive agent
 			score = -200;
 			StateObservation naiveState = null;
@@ -817,7 +821,7 @@ public class Chromosome implements Comparable<Chromosome>{
 				// add temp to framesCount
 				frameCount += temp;
 				naiveState = tempState;
-				
+
 				score = naiveState.getGameScore();
 				if(score > -100) {
 					naiveScoreSum += score;
@@ -827,7 +831,7 @@ public class Chromosome implements Comparable<Chromosome>{
 						naiveWinSum += 0.5;
 					}
 				}
-				
+
 				// gather all unique interactions between objects in the best agent
 				TreeSet s1 = naiveState.getEventsHistory();
 				Iterator<Event> iter1 = s1.iterator();
@@ -848,45 +852,45 @@ public class Chromosome implements Comparable<Chromosome>{
 				double avgBestScore = automatedScoreSum / SharedData.REPETITION_AMOUNT;
 				double avgNaiveScore = naiveScoreSum / SharedData.REPETITION_AMOUNT;
 				//double avgRandomScore = randomScoreSum / ActionTypeNum;
-				
+
 				double avgBestWin = automatedWinSum / SharedData.REPETITION_AMOUNT;
 				double avgNaiveWin = naiveWinSum / SharedData.REPETITION_AMOUNT;
 				double avgRandomWin = randomWinSum / ActionTypeNum;
-				
+
 				// calc sigmoid function with the score as "t"
 				double sigBest = 1 / (1 + Math.pow(Math.E, (0.1) * -avgBestScore));
 				double sigNaive = 1 / (1 + Math.pow(Math.E, (0.1) * -avgNaiveScore));
 				double sigRandom = 1 / (1 + Math.pow(Math.E, (0.1) * -randomScoreBest));
-				
+
 				// sum weighted win and sig-score values
 				double summedBest = 0.9 * avgBestWin + 0.1 * sigBest;
 				double summedNaive = 0.9 * avgNaiveWin + 0.1 * sigNaive;
 				double summedRandom = 0.9 * avgRandomWin + 0.1 * sigRandom;
-				
+
 				// calc game score differences
 				double gameScore = (summedBest - summedNaive) * (summedNaive - summedRandom);
 				System.out.print("("+summedBest+" - "+summedNaive+") * ("+summedNaive+" - "+summedRandom+")="+gameScore);
 				// allows rounding up due to weird scores
 				if(gameScore < -0.0005) {
-					
+
 					gameScore = 0;
 				}
 				// reward fitness for each unique interaction triggered
 				int uniqueCount = events.size();
 				// add a normalized unique count to the fitness
 				double rulesTriggered = uniqueCount / (ruleset[0].length * 1.0f + 1);
-				
+
 				// fitness is calculated by weight summing the 2 variables together
-				
+
 				double fitness = (gameScore + 1) * (rulesTriggered);
 				constrainFitness = 1.0;
 				this.fitness.set(0, constrainFitness);
 				this.fitness.set(1, fitness);
 		} 
-	}
-	
-public void calculateFitnessLight(long time) {
-		
+	}*/
+
+	public boolean calculateFitnessLight(long time) {
+
 		// reset bad frames
 		this.badFrames = 0;
 		// unique events that occurred in all the game simulations
@@ -901,7 +905,7 @@ public void calculateFitnessLight(long time) {
 			double score = -200;
 			ArrayList<Vector2d> SOs = new ArrayList<>();
 			// protects the fitness evaluation from looping forever
-	
+
 			// big vars
 			// keeps track of total number of simulated frames
 			int frameCount = 0;
@@ -916,13 +920,13 @@ public void calculateFitnessLight(long time) {
 				int temp = getAgentResult(tempState, SharedData.EVALUATION_STEP_COUNT, SharedData.automatedAgent);
 				// add temp to framesCount
 				frameCount += temp;
-				
+
 				if(tempState.getGameScore() > agentBestScore) {
 					agentBestScore = tempState.getGameScore();
 					bestState = tempState;
 					bestSolutionSize = temp;
 				}
-				
+
 				score = tempState.getGameScore();
 				automatedScoreSum += score;
 				if(tempState.getGameWinner() == Types.WINNER.PLAYER_WINS){
@@ -930,7 +934,7 @@ public void calculateFitnessLight(long time) {
 				} else if(tempState.getGameWinner() == Types.WINNER.NO_WINNER) {
 					automatedWinSum += 0.5;
 				}
-				
+
 				TreeSet s1 = tempState.getEventsHistory();
 				Iterator<Event> iter1 = s1.iterator();
 				while(iter1.hasNext()) {
@@ -940,106 +944,121 @@ public void calculateFitnessLight(long time) {
 				score = -200;
 				System.out.print("T");
 			}
-			 
+
 			// Random Agent
 			score = -200;
-			 
-			double randomScoreBest = -200.0;
-			double randomWinSum = 0.0;
+
+			//double randomScoreBest = -200.0;
+			//double randomWinSum = 0.0;
 			StateObservation randomState = null;
-			int ActionTypeNum = stateObs.getAvailableActions().size() + 2;
+			int ActionTypeNum = stateObs.getAvailableActions(true).size() + 1;
+			//int ActionTypeNum = 4;
+			double summedRandom = -200.0;
 			for(int i=0; i<ActionTypeNum; i++){
-				StateObservation tempState = stateObs.copy();
-				int temp = 0;
-				if (i==0) {
-					temp = getAgentResult(tempState, bestSolutionSize, SharedData.randomAgent);
+				double scoreBest = -200.0;
+				double winSum = 0.0;
+				for(int j=0;j<SharedData.REPETITION_AMOUNT;j++) {
+					StateObservation tempState = stateObs.copy();
+					int temp = 0;
+					if (i==0) {
+						temp = getAgentResult(tempState, bestSolutionSize, SharedData.randomAgent);
+					}
+					else {
+						temp = getSimpleResult(tempState, bestSolutionSize, stateObs.getAvailableActions(true).get(i-1));	
+					}
+					randomState = tempState;
+
+					score = randomState.getGameScore();
+					if(scoreBest < score) {
+						scoreBest = score;
+					}
+					if(randomState.getGameWinner() == Types.WINNER.PLAYER_WINS){
+						winSum += 1;
+					} else if(randomState.getGameWinner() == Types.WINNER.NO_WINNER) {
+						winSum += 0.5;
+					}
+
+					// gather all unique interactions between objects in the naive agent
+					TreeSet s1 = randomState.getEventsHistory();
+					Iterator<Event> iter1 = s1.iterator();
+					while(iter1.hasNext()) {
+						Event e = iter1.next();
+						events.add(e.activeTypeId + "" + e.passiveTypeId);
+					}
+					score = -200;
+
 				}
-				else if(i==1){
-					temp = getSimpleResult(tempState, bestSolutionSize, Types.ACTIONS.ACTION_NIL);
-				}
-				else {
-					temp = getSimpleResult(tempState, bestSolutionSize, stateObs.getAvailableActions().get(i-2));
-					
-				}
+
 				// add temp to framesCount
-				frameCount += temp;
-				randomState = tempState;
-				
-				score = randomState.getGameScore();
-				
-				
-				if(randomScoreBest < score) {
-					randomScoreBest = score;
-				}
+				//frameCount += temp;
 				//randomScoreSum += score;
-				if(randomState.getGameWinner() == Types.WINNER.PLAYER_WINS){
-					randomWinSum += 1;
-				} else if(randomState.getGameWinner() == Types.WINNER.NO_WINNER) {
-					randomWinSum += 0.5;
+				double avgRandomWin = winSum / SharedData.REPETITION_AMOUNT;
+				double sigRandom = 1 / (1 + Math.pow(Math.E, (0.1) * -scoreBest));
+				double tempsummedRandom = 0.9 * avgRandomWin + 0.1 * sigRandom;
+				if(summedRandom < tempsummedRandom) {
+					summedRandom = tempsummedRandom;
 				}
-				
-				// gather all unique interactions between objects in the naive agent
-				TreeSet s1 = randomState.getEventsHistory();
-				Iterator<Event> iter1 = s1.iterator();
-				while(iter1.hasNext()) {
-					Event e = iter1.next();
-					events.add(e.activeTypeId + "" + e.passiveTypeId);
-				}
-				score = -200;
 				System.out.print("N");
 			}
-			
-			double badFramePercent = badFrames / (1.0 * frameCount);
-//			if(badFramePercent > .3) {
-//				// if we have bad frames, this is still not a good game
-//				constrainFitness += 0.3 * (1 - badFrames / (1.0 * frameCount));
-//				this.fitness.set(0, constrainFitness);
-//			}
-//			else {
-				// find average scores and wins across playthroughs
-				double avgBestScore = automatedScoreSum / SharedData.REPETITION_AMOUNT;
-				//double avgNaiveScore = naiveScoreSum / SharedData.REPETITION_AMOUNT;
-				//double avgRandomScore = randomScoreSum / ActionTypeNum;
-				
-				double avgBestWin = automatedWinSum / SharedData.REPETITION_AMOUNT;
-				//double avgNaiveWin = naiveWinSum / SharedData.REPETITION_AMOUNT;
-				double avgRandomWin = randomWinSum / ActionTypeNum;
-				
-				// calc sigmoid function with the score as "t"
-				double sigBest = 1 / (1 + Math.pow(Math.E, (0.1) * -avgBestScore));
-				//double sigNaive = 1 / (1 + Math.pow(Math.E, (0.1) * -avgNaiveScore));
-				double sigRandom = 1 / (1 + Math.pow(Math.E, (0.1) * -randomScoreBest));
-				
-				// sum weighted win and sig-score values
-				double summedBest = 0.9 * avgBestWin + 0.1 * sigBest;
-				//double summedNaive = 0.9 * avgNaiveWin + 0.1 * sigNaive;
-				double summedRandom = 0.9 * avgRandomWin + 0.1 * sigRandom;
-				
-				// calc game score differences
-				double gameScore = (summedBest - summedRandom);
-				
-				// allows rounding up due to weird scores
-				/*if(gameScore < -0.0005) {
-					
+
+			//double badFramePercent = badFrames / (1.0 * frameCount);
+			//			if(badFramePercent > .3) {
+			//				// if we have bad frames, this is still not a good game
+			//				constrainFitness += 0.3 * (1 - badFrames / (1.0 * frameCount));
+			//				this.fitness.set(0, constrainFitness);
+			//			}
+			//			else {
+			// find average scores and wins across playthroughs
+			double avgBestScore = automatedScoreSum / SharedData.REPETITION_AMOUNT;
+			//double avgNaiveScore = naiveScoreSum / SharedData.REPETITION_AMOUNT;
+			//double avgRandomScore = randomScoreSum / ActionTypeNum;
+
+			double avgBestWin = automatedWinSum / SharedData.REPETITION_AMOUNT;
+			//double avgNaiveWin = naiveWinSum / SharedData.REPETITION_AMOUNT;
+			//double avgRandomWin = randomWinSum / ActionTypeNum;
+
+			// calc sigmoid function with the score as "t"
+			double sigBest = 1 / (1 + Math.pow(Math.E, (0.1) * -avgBestScore));
+			//double sigNaive = 1 / (1 + Math.pow(Math.E, (0.1) * -avgNaiveScore));
+			//double sigRandom = 1 / (1 + Math.pow(Math.E, (0.1) * -randomScoreBest));
+
+			// sum weighted win and sig-score values
+			double summedBest = 0.9 * avgBestWin + 0.1 * sigBest;
+			//double summedNaive = 0.9 * avgNaiveWin + 0.1 * sigNaive;
+			//double summedRandom = 0.9 * avgRandomWin + 0.1 * sigRandom;
+
+			// calc game score differences
+			double gameScore = (summedBest - summedRandom);
+
+			// allows rounding up due to weird scores
+			/*if(gameScore < -0.0005) {
+
 					gameScore = 0;
 				}*/
-				// reward fitness for each unique interaction triggered
-				int uniqueCount = events.size();
-				// add a normalized unique count to the fitness
-				double rulesTriggered = uniqueCount / (ruleset[0].length * 1.0f + 1);
-				
-				// fitness is calculated by weight summing the 2 variables together
-				
-				double fitness = (gameScore + 1) * (rulesTriggered);
-				constrainFitness = 1.0;
-				this.fitness.set(0, constrainFitness);
-				this.fitness.set(1, fitness);
+			// reward fitness for each unique interaction triggered
+			int uniqueCount = events.size();
+			// add a normalized unique count to the fitness
+			double rulesTriggered = uniqueCount / (ruleset[0].length * 1.0f + 1);
+
+			// fitness is calculated by weight summing the 2 variables together
+
+			//double fitness = gameScore + 1 * (rulesTriggered);
+			constrainFitness = 1.0;
+			this.fitness.set(0, constrainFitness);
+			this.fitness.set(1, gameScore*10.0);
+			this.fitness.set(2, rulesTriggered);
 		} 
+		if(this.fitness.get(0)==1) {
+			return true;
+		}
+		else{
+			return false;
+		}
 	}
 
-	
+	/*	
 public void calculateFitness2(long time) {
-		
+
 		// reset bad frames
 		this.badFrames = 0;
 		// unique events that occurred in all the game simulations
@@ -1054,7 +1073,7 @@ public void calculateFitness2(long time) {
 			double score = -200;
 			ArrayList<Vector2d> SOs = new ArrayList<>();
 			// protects the fitness evaluation from looping forever
-	
+
 			// big vars
 			// keeps track of total number of simulated frames
 			int frameCount = 0;
@@ -1069,13 +1088,13 @@ public void calculateFitness2(long time) {
 				int temp = getAgentResult(tempState, SharedData.EVALUATION_STEP_COUNT, SharedData.automatedAgent);
 				// add temp to framesCount
 				frameCount += temp;
-				
+
 				if(tempState.getGameScore() > agentBestScore) {
 					agentBestScore = tempState.getGameScore();
 					bestState = tempState;
 					bestSolutionSize = temp;
 				}
-				
+
 				score = tempState.getGameScore();
 				automatedScoreSum += score;
 				if(tempState.getGameWinner() == Types.WINNER.PLAYER_WINS){
@@ -1083,7 +1102,7 @@ public void calculateFitness2(long time) {
 				} else if(tempState.getGameWinner() == Types.WINNER.NO_WINNER) {
 					automatedWinSum += 0.5;
 				}
-				
+
 				TreeSet s1 = tempState.getEventsHistory();
 				Iterator<Event> iter1 = s1.iterator();
 				while(iter1.hasNext()) {
@@ -1092,10 +1111,10 @@ public void calculateFitness2(long time) {
 				}
 				score = -200;
 			}
-			 
+
 			// Random Agent
 			score = -200;
-			 
+
 			double randomScoreSum = 0.0;
 			double randomWinSum = 0.0;
 			StateObservation randomState = null;
@@ -1105,16 +1124,16 @@ public void calculateFitness2(long time) {
 				// add temp to framesCount
 				frameCount += temp;
 				randomState = tempState;
-				
+
 				score = randomState.getGameScore();
-				
+
 				randomScoreSum += score;
 				if(randomState.getGameWinner() == Types.WINNER.PLAYER_WINS){
 					randomWinSum += 1;
 				} else if(randomState.getGameWinner() == Types.WINNER.NO_WINNER) {
 					randomWinSum += 0.5;
 				}
-				
+
 				// gather all unique interactions between objects in the naive agent
 				TreeSet s1 = randomState.getEventsHistory();
 				Iterator<Event> iter1 = s1.iterator();
@@ -1124,7 +1143,7 @@ public void calculateFitness2(long time) {
 				}
 				score = -200;
 			}
-			
+
 			// Naive agent
 			score = -200;
 			StateObservation naiveState = null;
@@ -1137,7 +1156,7 @@ public void calculateFitness2(long time) {
 				// add temp to framesCount
 				frameCount += temp;
 				naiveState = tempState;
-				
+
 				score = naiveState.getGameScore();
 				if(score > -100) {
 					naiveScoreSum += score;
@@ -1147,7 +1166,7 @@ public void calculateFitness2(long time) {
 						naiveWinSum += 0.5;
 					}
 				}
-				
+
 				// gather all unique interactions between objects in the best agent
 				TreeSet s1 = naiveState.getEventsHistory();
 				Iterator<Event> iter1 = s1.iterator();
@@ -1168,44 +1187,44 @@ public void calculateFitness2(long time) {
 				double avgBestScore = automatedScoreSum / SharedData.REPETITION_AMOUNT;
 				double avgNaiveScore = naiveScoreSum / SharedData.REPETITION_AMOUNT;
 				double avgRandomScore = randomScoreSum / SharedData.REPETITION_AMOUNT;
-				
+
 				double avgBestWin = automatedWinSum / SharedData.REPETITION_AMOUNT;
 				double avgNaiveWin = naiveWinSum / SharedData.REPETITION_AMOUNT;
 				double avgRandomWin = randomWinSum / SharedData.REPETITION_AMOUNT;
-				
+
 				// calc sigmoid function with the score as "t"
 				double sigBest = 1 / (1 + Math.pow(Math.E, (0.1) * -avgBestScore));
 				double sigNaive = 1 / (1 + Math.pow(Math.E, (0.1) * -avgNaiveScore));
 				double sigRandom = 1 / (1 + Math.pow(Math.E, (0.1) * -avgRandomScore));
-				
+
 				// sum weighted win and sig-score values
 				double summedBest = 0.9 * avgBestWin + 0.1 * sigBest;
 				double summedNaive = 0.9 * avgNaiveWin + 0.1 * sigNaive;
 				double summedRandom = 0.9 * avgRandomWin + 0.1 * sigRandom;
-	
+
 				// calc game score differences
 				double gameScore = (summedBest - summedNaive) * (summedNaive - summedRandom);
-				
+
 				// allows rounding up due to weird scores
 				if(gameScore > -0.0005) {
-					
+
 					gameScore = 0;
 				}
 				// reward fitness for each unique interaction triggered
 				int uniqueCount = events.size();
 				// add a normalized unique count to the fitness
 				double rulesTriggered = uniqueCount / (ruleset[0].length * 1.0f + 1);
-				
+
 				// fitness is calculated by weight summing the 2 variables together
-				
+
 				double fitness = (gameScore + 1) * (rulesTriggered);
 				constrainFitness = 1.0;
 				this.fitness.set(0, constrainFitness);
 				this.fitness.set(1, fitness);
 		} 
-	}
+	}*/
 
-	
+
 
 	/**
 	 * Play the current level using the naive player
@@ -1235,9 +1254,9 @@ public void calculateFitness2(long time) {
 		}
 		return i;
 	}
-	
-	
-	
+
+
+
 	private int getAgentResult(StateObservation stateObs, int steps, AbstractPlayer agent){
 		int i =0;
 		int k = 0;
@@ -1258,7 +1277,7 @@ public void calculateFitness2(long time) {
 		}
 		return i;
 	}
-	
+
 	/**
 	 * crossover the current chromosome with the input chromosome
 	 * @param c	the other chromosome to crossover with
@@ -1354,18 +1373,18 @@ public void calculateFitness2(long time) {
 			temp = (ArrayList<String>) temp.stream().distinct().collect(Collectors.toList());
 			nRuleSetTwo[i] = new String[temp.size()];
 			nRuleSetTwo[i] = temp.toArray(nRuleSetTwo[i]);
-			}
+		}
 
 		return children;
 	}
 
-	
+
 	private void cleanOpenloopAgents() {
 		((tracks.singlePlayer.advanced.olets.Agent)SharedData.automatedAgent).mctsPlayer = 
-			new tracks.singlePlayer.advanced.olets.SingleMCTSPlayer(new Random(), 
-				(tracks.singlePlayer.advanced.olets.Agent) SharedData.automatedAgent);
+				new tracks.singlePlayer.advanced.olets.SingleMCTSPlayer(new Random(), 
+						(tracks.singlePlayer.advanced.olets.Agent) SharedData.automatedAgent);
 	}
-	
+
 	/***
 	 * Checks to see if sprites are off screen
 	 * @param stateObs the temporary state observation of the game
@@ -1385,18 +1404,18 @@ public void calculateFitness2(long time) {
 				allSprites.addAll(list);
 			}
 		}
-		
+
 		temp = stateObs.getMovablePositions();
 		if(temp != null) {
 			for(ArrayList<Observation> list : temp) {
 				allSprites.addAll(list);
 			}
 		}
-		
+
 		// calculate screen size
 		int xMin = -1 * stateObs.getBlockSize();
 		int yMin = -1 * stateObs.getBlockSize();
-		
+
 		// add a 1 pixel buffer
 		int xMax = (SharedData.la.getWidth()+1) * stateObs.getBlockSize();
 		int yMax = (SharedData.la.getLength()+1) * stateObs.getBlockSize();
@@ -1412,9 +1431,9 @@ public void calculateFitness2(long time) {
 			}
 		}
 		return counter;
-		
+
 	}
-	
+
 	/**
 	 * Compare two chromosome with each other based on their
 	 * constrained fitness and normal fitness

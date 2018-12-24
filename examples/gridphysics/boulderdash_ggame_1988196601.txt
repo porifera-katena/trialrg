@@ -1,0 +1,35 @@
+BasicGame
+    SpriteSet
+        sword > Flicker  singleton=True img=oryx/pickaxe color=LIGHTGRAY limit=1
+        diamond > Resource  img=oryx/diamond3 shrinkfactor=0.75 color=YELLOW limit=10
+        boulder > Missile  orientation=DOWN img=oryx/mineral1 color=GRAY speed=0.2
+        background > Immovable  img=oryx/backBlack hidden=True
+        butterfly > RandomNPC  img=oryx/bat2 color=PINK cons=1
+        dirt > Immovable  img=oryx/backLBrown color=BROWN
+        avatar > ShootAvatar  frameRate=8 img=oryx/spelunky stype=sword
+        wall > Immovable  img=oryx/dirtWall autotiling=true
+        exitdoor > Door  img=oryx/door2 color=GREEN
+        crab > RandomNPC  img=oryx/scorpion2 color=RED cons=1
+    LevelMapping
+        . > background dirt
+        - > background
+        e > background exitdoor
+        o > background boulder
+        x > background diamond
+        c > background crab
+        b > background butterfly
+        A > background avatar
+    InteractionSet
+        dirt avatar > subtractHealthPoints stype=butterfly resource=diamond limit=5 value=2 stype_order=crab
+        background avatar > align stype=butterfly resource=diamond limit=5 value=2 stype_order=crab
+        EOS background > collectResource scoreChange=-2 stype=butterfly resource=diamond limit=5 value=2 stype_order=crab
+        background diamond > addHealthPoints stype=butterfly resource=diamond limit=5 value=2 stype_order=crab
+        boulder background > pullWithIt stype=butterfly resource=diamond limit=5 value=2 stype_order=crab
+        EOS exitdoor > subtractHealthPoints stype=butterfly resource=diamond limit=5 value=2 stype_order=crab
+        
+        sword avatar > bounceForward scoreChange=-2 stype=butterfly resource=diamond limit=5 value=2 stype_order=crab
+        exitdoor avatar > increaseSpeedToAll stype=butterfly resource=diamond limit=5 value=2 stype_order=crab
+        background butterfly > attractGaze stype=butterfly resource=diamond limit=5 value=2 stype_order=crab
+    TerminationSet
+        SpriteCounter stype=exitdoor limit=0 win=True
+        SpriteCounter stype=avatar limit=0 win=False

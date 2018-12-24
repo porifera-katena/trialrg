@@ -26,14 +26,26 @@ public class RuleGenerator extends AbstractRuleGenerator{
 	
 	private int InteractionNum = 8;
 	
+	private ArrayList<SpriteData> avatar;
+	private ArrayList<SpriteData> door;
+	private ArrayList<SpriteData> resource;
+	private ArrayList<SpriteData> fleeing;
+	private ArrayList<SpriteData> npc;
 	
-	private String[] availableInteractions = new String[] { "killSprite", "killAll", "killIfHasMore", "killIfHasLess",
-			"killIfFromAbove", "killIfOtherHasMore", "spawnBehind", "stepBack", "spawnIfHasMore", "spawnIfHasLess",
-			"cloneSprite", "transformTo", "undoAll", "flipDirection", "transformToRandomChild", "updateSpawnType",
-			"removeScore", "addHealthPoints", "addHealthPointsToMax", "reverseDirection", "subtractHealthPoints",
-			"increaseSpeedToAll", "decreaseSpeedToAll", "attractGaze", "align", "turnAround", "wrapAround",
-			"pullWithIt", "bounceForward", "teleportToExit", "collectResource", "setSpeedForAll",// "undoAll",
-			"reverseDirection", "changeResource" };
+	private String target;
+	
+	private String[] availableInteractions = new String[] { 
+			"killSprite", "killAll stype=<@stype@>", "killIfHasMore resource=<@resource@> limit=<@limit@>", "killIfHasLess resource=<@resource@> limit=<@limit@>",
+			"killIfFromAbove", "killIfOtherHasMore resource=<@resource@> limit=<@limit@>", "spawnBehind stype=<@stype@>", "stepBack", "spawnIfHasMore stype=<@stype@> resource=<@resource@> limit=<@limit@>", "spawnIfHasLess stype=<@stype@> resource=<@resource@> limit=<@limit@>",
+			"cloneSprite", "transformTo stype=<@stype@> forceOrientation=<@bool@>", "flipDirection", /*"transformToRandomChild  stype=<@stype@>", "updateSpawnType stype=<@stype@> spawnPoint=<@stype@>",*/
+			"removeScore  stype=<@stype@>", "addHealthPoints value=<@value@>", "addHealthPointsToMax value=<@value@>", "reverseDirection", "subtractHealthPoints stype=<@stype@> value=<@value@>",
+			"increaseSpeedToAll stype=<@stype@> value=<@value@>", "decreaseSpeedToAll stype=<@stype@> value=<@value@>", "attractGaze", "align", "turnAround", "wrapAround",
+			"pullWithIt", "bounceForward", "teleportToExit", "collectResource", "setSpeedForAll stype=<@stype@> value=<@value@>",// "undoAll",
+			"reverseDirection", "changeResource resource=<@resource@> value=<@value@>" };
+	private String[] availableKillingInteractions = new String[] { 
+			"killSprite", "killAll stype=<@stype@>", "killIfHasMore resource=<@resource@> limit=<@limit@>", "killIfHasLess resource=<@resource@> limit=<@limit@>",
+			"killIfFromAbove", "killIfOtherHasMore resource=<@resource@> limit=<@limit@>"
+	};
 	/**
 	 * initialize the agents used during evaluating the chromosome
 	 */
@@ -105,6 +117,357 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		SharedData.constGen.generateRules(sl, time);
 	}
 	
+	/**
+	 * Generates the rules using evolution
+	 * @param sl	the SL description
+	 * @param time	the time allowed for the generator to loop
+	 */
+	@Override
+	public String[][] generateRules(SLDescription sl, ElapsedCpuTimer time) {
+		SpriteData[] sprites = sl.getGameSprites();
+		
+		ArrayList<String> usefulSprites = new ArrayList<String>();
+		
+		String[][] currentLevel = sl.getCurrentLevel();
+		// Just get the useful sprites from the current level
+		for (int y = 0; y < currentLevel.length; y++) {
+			for (int x = 0; x < currentLevel[y].length; x++) {
+				String[] parts = currentLevel[y][x].split(",");
+				for (int i = 0; i < parts.length; i++) {
+					if (parts[i].trim().length() > 0) {
+						// Add the sprite if it doesn't exisit
+						if (!usefulSprites.contains(parts[i].trim())) {
+							usefulSprites.add(parts[i].trim());
+						}
+					}
+				}
+			}
+		}
+		
+		boolean flag = true;
+		while(flag) {
+			flag = false;
+			for(SpriteData s : sprites) {
+				if(usefulSprites.contains(s.name)) {
+					String[] parameters = s.toString().split(" ",0);
+					for(String p:parameters) {
+						if(p.matches(".*stype=.*")) {
+							p = p.replace("stype=", "");
+							if(!usefulSprites.contains(p)) {
+								usefulSprites.add(p);
+								flag = true;
+							}
+						}
+					}
+				}
+			}
+		}
+		usefulSprites.add("EOS");
+		
+		for(String s:usefulSprites) {
+			System.out.println(s);
+		}
+		
+		avatar = new ArrayList<SpriteData>();
+		door = new ArrayList<SpriteData>();
+		resource = new ArrayList<SpriteData>();
+		fleeing = new ArrayList<SpriteData>();
+		npc = new ArrayList<SpriteData>();
+		for(SpriteData s : sprites) {
+			System.out.println(s.name +"("+s.type+")");
+			if(s.type.toLowerCase().matches(".*avatar.*")) {
+				avatar.add(s);
+			}
+			if(s.type.toLowerCase().matches(".*door.*")) {
+				System.out.println(s.type+"##");
+				door.add(s);
+			}
+			if(s.type.toLowerCase().matches(".*resource.*")) {
+				resource.add(s);
+			}
+			if(s.type.toLowerCase().matches(".*fleeing.*")) {
+				fleeing.add(s);
+			}
+			if(s.type.toLowerCase().matches(".*chaser.*") || s.type.toLowerCase().matches(".*bomber.*") || s.type.toLowerCase().matches(".*npc.*") || s.type.toLowerCase().matches(".*spreader.*")) {
+				if(usefulSprites.contains(s.name)) {
+					npc.add(s);
+				}
+			}
+			if(!usefulSprites.contains(s.name)) {
+				s = null;
+			}
+			
+		}
+		
+		ArrayList<String> terminations = new ArrayList<String>();
+		ArrayList<String> interactions = new ArrayList<String>();
+		
+		if(door.size()>0) {
+			ArrayList<SpriteData> targetSprites = door;
+			int j = SharedData.random.nextInt(targetSprites.size());
+			for(int i=0;i<targetSprites.size();i++) {
+				j = (j+1)%targetSprites.size();
+				if (usefulSprites.contains(targetSprites.get(j).name)) {
+					target = targetSprites.get(j).name;
+					terminations.add("SpriteCounter stype=" + targetSprites.get(j).name + " limit=0 win=True");
+					break;
+				}
+			}
+		}
+		else if(resource.size()>0) {
+			ArrayList<SpriteData> targetSprites = resource;
+			int j = SharedData.random.nextInt(targetSprites.size());
+			for(int i=0;i<targetSprites.size();i++) {
+				j = (j+1)%targetSprites.size();
+				if (usefulSprites.contains(targetSprites.get(j).name)) {
+					target = targetSprites.get(j).name;
+					terminations.add("SpriteCounter stype=" + targetSprites.get(j).name + " limit=0 win=True");
+					break;
+				}
+			}
+		}
+		else if(fleeing.size()>0) {
+			ArrayList<SpriteData> targetSprites = fleeing;
+			int j = SharedData.random.nextInt(targetSprites.size());
+			for(int i=0;i<targetSprites.size();i++) {
+				j = (j+1)%targetSprites.size();
+				if (usefulSprites.contains(targetSprites.get(j).name)) {
+					target = targetSprites.get(j).name;
+					terminations.add("SpriteCounter stype=" + targetSprites.get(j).name + " limit=0 win=True");
+					break;
+				}
+			}
+		}
+		else if(npc.size()>0) {
+			int i = SharedData.random.nextInt(npc.size());
+			terminations.add("SpriteCounter stype=" + npc.get(i).name + " limit=0 win=True");
+			target = npc.get(i).name;
+		}
+		terminations.add("SpriteCounter stype=" + avatar.get(0).name + " limit=0 win=False");
+		/*door resource fleeing chaser bomber&Random&Spreader*/
+		for(int i=0;i<10;i++) {
+			interactions.add(createInteraction(usefulSprites,i));
+			sl.testRules(toStringArray(interactions),toStringArray(terminations));
+			while(sl.getErrors().size() > 0){
+				interactions.remove(i);
+				interactions.add(createInteraction(usefulSprites,i));
+				sl.testRules(toStringArray(interactions),toStringArray(terminations));
+			}
+		}
+		/*for(Types.ACTIONS a:sl.testRules(toStringArray(interactions),toStringArray(terminations)).getAvailableActions()){
+			System.out.println("("+a+")");
+		}*/
+		String[][] r = {toStringArray(interactions),toStringArray(terminations)};
+		Chromosome bestChromosome = new Chromosome(r,sl);
+		 
+		double worstTime = 4 * SharedData.EVALUATION_TIME * InteractionNum;
+		double avgTime = worstTime;
+		double avgcalcFitTime = 4 * SharedData.EVALUATION_TIME;
+		double totalTime = 0;
+		int calculateFitNum = 0;
+		int numberOfIterations = 0;
+		int mutatedInteractions[] = {-1,-1};
+		
+		// START EVO LOOP
+		ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
+		ArrayList<Chromosome> newChromosomes = new ArrayList<Chromosome>();
+		Logger.getInstance().active = false;
+		while(time.remainingTimeMillis() > 4 * avgTime && time.remainingTimeMillis() > worstTime && time.remainingTimeMillis() > InteractionNum * avgcalcFitTime * 2){
+			int remainingcalcFitTime = (int) ( (time.remainingTimeMillis() / avgcalcFitTime) - InteractionNum*2);
+			ElapsedCpuTimer timer = new ElapsedCpuTimer();
+			System.out.println("Generation #" + (numberOfIterations + 1) + ": ");
+			chromosomes.clear();
+			for (int i = 0; i < InteractionNum; i++) {
+				if(mutatedInteractions[0]!=i && mutatedInteractions[1]!=i) {
+					ArrayList<String> temp = new ArrayList<String>();
+					temp = (ArrayList<String>) interactions.clone();
+					temp.remove(i);
+					String[][] rules = {toStringArray(temp),toStringArray(terminations)};
+					Chromosome c = new Chromosome(rules,sl,i);
+					if(c.calculateFitnessLight(SharedData.EVALUATION_TIME)) {
+						calculateFitNum++;
+					}
+					chromosomes.add(c);
+					if(bestChromosome.compareTo(c)<0) {
+						bestChromosome = c;
+					}
+					System.out.print("*");
+				}
+			}
+			System.out.println();
+			for (Chromosome c : newChromosomes) {
+				chromosomes.add(c);
+			}
+			
+			Collections.shuffle(chromosomes);
+			Collections.sort(chromosomes);
+			for(int i=0;i<2;i++) {
+				mutatedInteractions[i] = chromosomes.get(i).id;
+			}
+			
+			for(Chromosome c:chromosomes) {
+				System.out.print("[");
+				for(Double f:c.getFitness()) {
+					System.out.print(f+",");
+				}
+				System.out.print("]");
+			}
+			System.out.println();
+			/******************************/
+			newChromosomes.clear();
+			for (int i = 0; i < 2; i++) {
+				Chromosome c = null;
+				Chromosome worst = chromosomes.get(InteractionNum-1);;
+				for(int j=0;j<remainingcalcFitTime;j++) {
+					System.out.print(i);
+					interactions.set(mutatedInteractions[i], createInteraction(usefulSprites,mutatedInteractions[i]));
+					sl.testRules(toStringArray(interactions),toStringArray(terminations));
+					while(sl.getErrors().size() > 0){
+						interactions.set(mutatedInteractions[i], createInteraction(usefulSprites,mutatedInteractions[i]));
+						sl.testRules(toStringArray(interactions),toStringArray(terminations));
+					}
+					ArrayList<String> temp = new ArrayList<String>();
+					temp = (ArrayList<String>) interactions.clone();
+					temp.remove(mutatedInteractions[(i+1)%2]);
+					String[][] rules = {toStringArray(temp),toStringArray(terminations)};
+					c = new Chromosome(rules,sl,mutatedInteractions[(i+1)%2]);
+					if(c.calculateFitnessLight(SharedData.EVALUATION_TIME)) {
+						calculateFitNum++;
+					}
+					if(bestChromosome.compareTo(c)<0) {
+						bestChromosome = c;
+					}
+					System.out.print("c="+worst.compareTo(c)+" ");
+					if (worst.compareTo(c)>=0) {
+						remainingcalcFitTime = remainingcalcFitTime - (j+1);
+						break;
+					}
+					System.out.print("{");
+					for(Double f:c.getFitness()) {
+						System.out.print(f+",");
+					}
+					System.out.print("}");
+				}
+				newChromosomes.add(c);
+				
+			}
+			/***********************/
+			numberOfIterations += 1;
+			totalTime += timer.elapsedMillis();
+			avgTime = totalTime / numberOfIterations;
+			avgcalcFitTime = totalTime/calculateFitNum;
+		}
+		
+		for (int i = 0; i < 1; i++) {
+			interactions.set(chromosomes.get(i).id, "");
+		}
+		/*
+		for(String s:interactions) {
+			System.out.println(s);
+		}
+		for(String s:terminations) {
+			System.out.println(s);
+		}
+		String[][] rules = {toStringArray(interactions),toStringArray(terminations)};*/
+		//Chromosome c = new Chromosome(rules,sl,0);
+		//c.calculateFitness(0);
+		//System.out.println(c.getFitness());
+		
+		String[][] rules = bestChromosome.getRuleset();
+		
+		for(String[] lists:rules) {
+			for(String s:lists) {
+				System.out.println(s);
+			}
+		}
+		
+		return rules;
+	}
+	
+	
+	private String createInteraction(ArrayList<String> usefulSprites,int i) {
+		if (i==0) {
+			return createGoalInteraction(usefulSprites, target);
+		}
+		else {
+			return createInteraction(usefulSprites);
+		}
+	}
+
+	private String createInteraction(ArrayList<String> usefulSprites) {
+		int i1 = SharedData.random.nextInt(usefulSprites.size());
+		int i2 = (i1 + 1 + SharedData.random.nextInt(usefulSprites.size() - 1)) % usefulSprites.size();
+		// add score change parameter for interactions
+		String scoreChange = "";
+		if(SharedData.random.nextBoolean()){
+			scoreChange += "scoreChange=" + (SharedData.random.nextInt(5) - 2)+" ";
+		}
+		String interaction = (usefulSprites.get(i1) + " " + usefulSprites.get(i2) + " > " +
+				this.availableInteractions[SharedData.random.nextInt(this.availableInteractions.length)] + " " + scoreChange);
+		while (interaction.contains("<@stype@>")) {
+			interaction = interaction.replaceFirst("<@stype@>", usefulSprites.get(SharedData.random.nextInt(usefulSprites.size()-1)));
+		}
+		if (resource.size()>0) {
+		while (interaction.contains("<@resource@>")) {
+				interaction = interaction.replaceFirst("<@resource@>", resource.get(SharedData.random.nextInt(resource.size())).name);
+			}
+		}
+		while (interaction.contains("<@limit@>")) {
+			interaction = interaction.replaceFirst("<@limit@>", ""+SharedData.random.nextInt(10));
+		}
+		while (interaction.contains("<@value@>")) {
+			interaction = interaction.replaceFirst("<@value@>", ""+SharedData.random.nextInt(10));
+		}
+		while (interaction.contains("<@bool@>")) {
+			if (SharedData.random.nextBoolean()) {
+				interaction = interaction.replaceFirst("<@bool@>", "true");
+			}
+			else {
+				interaction = interaction.replaceFirst("<@bool@>", "false");
+			}
+		}
+		// add the new random interaction that doesn't produce errors
+		System.out.println(interaction);
+		return interaction;
+	}
+	
+	private String createGoalInteraction(ArrayList<String> usefulSprites,String target) {
+		int i = SharedData.random.nextInt(usefulSprites.size());
+		String interaction = (target + " " + usefulSprites.get(i) + " > " +
+				this.availableKillingInteractions[SharedData.random.nextInt(this.availableKillingInteractions.length)]);
+		while (interaction.contains("<@stype@>")) {
+			interaction = interaction.replaceFirst("<@stype@>", target);
+		}
+		if (resource.size()>0) {
+		while (interaction.contains("<@resource@>")) {
+				interaction = interaction.replaceFirst("<@resource@>", resource.get(SharedData.random.nextInt(resource.size())).name);
+			}
+		}
+		while (interaction.contains("<@limit@>")) {
+			interaction = interaction.replaceFirst("<@limit@>", ""+SharedData.random.nextInt(10));
+		}
+		while (interaction.contains("<@value@>")) {
+			interaction = interaction.replaceFirst("<@value@>", ""+SharedData.random.nextInt(10));
+		}
+		while (interaction.contains("<@bool@>")) {
+			if (SharedData.random.nextBoolean()) {
+				interaction = interaction.replaceFirst("<@bool@>", "true");
+			}
+			else {
+				interaction = interaction.replaceFirst("<@bool@>", "false");
+			}
+		}
+		// add the new random interaction that doesn't produce errors
+		System.out.println(interaction);
+		return interaction;	
+	}
+	
+	private String[] toStringArray(ArrayList<String> arlist) {
+		String[] str = new String[arlist.size()];
+		arlist.toArray(str);
+		return str;
+	}
+	/*
 	private ArrayList<Chromosome> getFirstPopulation(SLDescription sl, String name, int amount, int mutations){
 	    	ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
 	    	try{
@@ -114,7 +477,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
             	 	for(int i = 0; i < amount; i++) {
         	 		Chromosome c = new Chromosome(ruleGen.generateRules(sl, null), sl);
         	 		c.cleanseChromosome();
-        	 		c.calculateFitness(SharedData.EVALUATION_TIME);
+        	 		c.calculateFitnessLight(SharedData.EVALUATION_TIME);
         	 		for(int j = 0; j < mutations; j++) {
         				c.mutate();
         			}
@@ -125,8 +488,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 	    	    e.printStackTrace();
 	    	}
     	 	return chromosomes;
-	}
-	
+	}*/
 	/**
 	 * Get the next population based on the current feasible infeasible population
 	 * @param fPopulation	array of the current feasible chromosomes
@@ -251,7 +613,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 	 * @param population 	the population to be performed upon
 	 * @return
 	 */
-	private Chromosome rankSelection(ArrayList<Chromosome> population) {
+	/*private Chromosome rankSelection(ArrayList<Chromosome> population) {
 		double[] probabilities = new double[population.size()];
 		probabilities[0] = 1.0;
 		for(int i = 1; i < population.size(); i++) {
@@ -269,229 +631,8 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		}
 		return population.get(0);
 
-	}
-	/**
-	 * Generates the rules using evolution
-	 * @param sl	the SL description
-	 * @param time	the time allowed for the generator to loop
-	 */
-	@Override
-	public String[][] generateRules(SLDescription sl, ElapsedCpuTimer time) {
-		SpriteData[] sprites = sl.getGameSprites();
-		
-		ArrayList<String> usefulSprites = new ArrayList<String>();
-		
-		String[][] currentLevel = sl.getCurrentLevel();
-		// Just get the useful sprites from the current level
-		for (int y = 0; y < currentLevel.length; y++) {
-			for (int x = 0; x < currentLevel[y].length; x++) {
-				String[] parts = currentLevel[y][x].split(",");
-				for (int i = 0; i < parts.length; i++) {
-					if (parts[i].trim().length() > 0) {
-						// Add the sprite if it doesn't exisit
-						if (!usefulSprites.contains(parts[i].trim())) {
-							usefulSprites.add(parts[i].trim());
-						}
-					}
-				}
-			}
-		}
-		
-		boolean flag = true;
-		while(flag) {
-			flag = false;
-			for(SpriteData s : sprites) {
-				if(usefulSprites.contains(s.name)) {
-					String[] parameters = s.toString().split(" ",0);
-					for(String p:parameters) {
-						if(p.matches(".*stype=.*")) {
-							p = p.replace("stype=", "");
-							if(!usefulSprites.contains(p)) {
-								usefulSprites.add(p);
-								flag = true;
-							}
-						}
-					}
-				}
-			}
-		}
-		usefulSprites.add("EOS");
-		
-		for(String s:usefulSprites) {
-			System.out.println(s);
-		}
-		
-		ArrayList<SpriteData> avatar = new ArrayList<SpriteData>();
-		ArrayList<SpriteData> door = new ArrayList<SpriteData>();
-		ArrayList<SpriteData> resource = new ArrayList<SpriteData>();
-		ArrayList<SpriteData> fleeing = new ArrayList<SpriteData>();
-		ArrayList<SpriteData> npc = new ArrayList<SpriteData>();
-		for(SpriteData s : sprites) {
-			System.out.println(s.name +"("+s.type+")");
-			if(s.type.toLowerCase().matches(".*avatar.*")) {
-				avatar.add(s);
-			}
-			if(s.type.toLowerCase().matches(".*door.*")) {
-				System.out.println(s.type+"##");
-				door.add(s);
-			}
-			if(s.type.toLowerCase().matches(".*resource.*")) {
-				resource.add(s);
-			}
-			if(s.type.toLowerCase().matches(".*fleeing.*")) {
-				fleeing.add(s);
-			}
-			if(s.type.toLowerCase().matches(".*chaser.*") || s.type.toLowerCase().matches(".*bomber.*") || s.type.toLowerCase().matches(".*npc.*") || s.type.toLowerCase().matches(".*spreader.*")) {
-				if(usefulSprites.contains(s.name)) {
-					npc.add(s);
-				}
-			}
-			if(!usefulSprites.contains(s.name)) {
-				s = null;
-			}
-			
-		}
-		
-		ArrayList<String> terminations = new ArrayList<String>();
-		ArrayList<String> interactions = new ArrayList<String>();
-		if(door.size()>0 && usefulSprites.contains(door.get(0).name)) {
-			terminations.add("SpriteCounter stype=" + door.get(0).name + " limit=0 win=True");
-		}
-		else if(resource.size()>0 && usefulSprites.contains(resource.get(0).name)) {
-			terminations.add("SpriteCounter stype=" + resource.get(0).name + " limit=0 win=True");
-		}
-		else if(fleeing.size()>0 && usefulSprites.contains(fleeing.get(0).name)) {
-			terminations.add("SpriteCounter stype=" + fleeing.get(0).name + " limit=0 win=True");
-		}
-		else if(npc.size()>0) {
-			terminations.add("SpriteCounter stype=" + npc.get(SharedData.random.nextInt(npc.size())).name + " limit=0 win=True");
-		}
-		terminations.add("SpriteCounter stype=" + avatar.get(0).name + " limit=0 win=False");
-		/*door resource fleeing chaser bomber&Random&Spreader*/
-		for(int i=0;i<10;i++) {
-			interactions.add(createInteraction(usefulSprites));
-			sl.testRules(toStringArray(interactions),toStringArray(terminations));
-			while(sl.getErrors().size() > 0){
-				interactions.remove(i);
-				interactions.add(createInteraction(usefulSprites));
-				sl.testRules(toStringArray(interactions),toStringArray(terminations));
-			}
-		}
-		/*for(Types.ACTIONS a:sl.testRules(toStringArray(interactions),toStringArray(terminations)).getAvailableActions()){
-			System.out.println("("+a+")");
-		}*/
-		
-		
-		double worstTime = 4 * SharedData.EVALUATION_TIME * SharedData.POPULATION_SIZE;
-		double avgTime = worstTime;
-		double totalTime = 0;
-		int numberOfIterations = 0;
-		int mutatedInteractions[] = {-1,-1};
-		
-		// START EVO LOOP
-		ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
-		ArrayList<Chromosome> newChromosomes = new ArrayList<Chromosome>();
-		Logger.getInstance().active = false;
-		while(time.remainingTimeMillis() > 4 * avgTime && time.remainingTimeMillis() > worstTime){
-			ElapsedCpuTimer timer = new ElapsedCpuTimer();
-			System.out.println("Generation #" + (numberOfIterations + 1) + ": ");
-			chromosomes.clear();
-			for (int i = 0; i < InteractionNum; i++) {
-				if(mutatedInteractions[0]!=i && mutatedInteractions[1]!=i) {
-					ArrayList<String> temp = new ArrayList<String>();
-					temp = (ArrayList<String>) interactions.clone();
-					temp.remove(i);
-					String[][] rules = {toStringArray(temp),toStringArray(terminations)};
-					Chromosome c = new Chromosome(rules,sl,i);
-					c.calculateFitnessLight(SharedData.EVALUATION_TIME);
-					chromosomes.add(c);
-					System.out.print("*");
-				}
-			}
-			System.out.println();
-			for (Chromosome c : newChromosomes) {
-				chromosomes.add(c);
-			}
-			
-			Collections.shuffle(chromosomes);
-			Collections.sort(chromosomes);
-			for(int i=0;i<2;i++) {
-				mutatedInteractions[i] = chromosomes.get(i).id;
-			}
-			
-			for(Chromosome c:chromosomes) {
-				System.out.print("[");
-				for(Double f:c.getFitness()) {
-					System.out.print(f+",");
-				}
-				System.out.print("]");
-			}
-			System.out.println();
-			/******************************/
-			newChromosomes.clear();
-			for (int i = 0; i < 2; i++) {
-				Chromosome c = null;
-				Chromosome worst;
-				do {
-					System.out.print(i);
-					worst = chromosomes.get(InteractionNum-1);
-					interactions.set(mutatedInteractions[i], createInteraction(usefulSprites));
-					sl.testRules(toStringArray(interactions),toStringArray(terminations));
-					while(sl.getErrors().size() > 0){
-						interactions.set(mutatedInteractions[i], createInteraction(usefulSprites));
-						sl.testRules(toStringArray(interactions),toStringArray(terminations));
-					}
-					ArrayList<String> temp = new ArrayList<String>();
-					temp = (ArrayList<String>) interactions.clone();
-					temp.remove(mutatedInteractions[(i+1)%2]);
-					String[][] rules = {toStringArray(temp),toStringArray(terminations)};
-					c = new Chromosome(rules,sl,mutatedInteractions[(i+1)%2]);
-					c.calculateFitnessLight(SharedData.EVALUATION_TIME);
-					System.out.print("c="+worst.compareTo(c)+" ");
-				} while (worst.compareTo(c)<0);
-				newChromosomes.add(c);
-				System.out.print("{");
-				for(Double f:c.getFitness()) {
-					System.out.print(f+",");
-				}
-				System.out.print("}");
-			}
-			/***********************/
-			numberOfIterations += 1;
-			totalTime += timer.elapsedMillis();
-			avgTime = totalTime / numberOfIterations;
-		}
-		
-		for (int i = 0; i < 1; i++) {
-			interactions.set(chromosomes.get(i).id, "");
-		}
-		
-		for(String s:interactions) {
-			System.out.println(s);
-		}
-		for(String s:terminations) {
-			System.out.println(s);
-		}
-		String[][] rules = {toStringArray(interactions),toStringArray(terminations)};
-		//Chromosome c = new Chromosome(rules,sl,0);
-		//c.calculateFitness(0);
-		//System.out.println(c.getFitness());
-		
-		return rules;
-	}
+	}*/
 	
-	private String createInteraction(ArrayList<String> usefulSprites) {
-		int i1 = SharedData.random.nextInt(usefulSprites.size());
-		int i2 = (i1 + 1 + SharedData.random.nextInt(usefulSprites.size() - 1)) % usefulSprites.size();
-		// add score change parameter for interactions
-		String scoreChange = "";
-		if(SharedData.random.nextBoolean()){
-			scoreChange += "scoreChange=" + (SharedData.random.nextInt(5) - 2);
-		}
-		// add the new random interaction that doesn't produce errors
-		return (usefulSprites.get(i1) + " " + usefulSprites.get(i2) + " > " +
-				this.availableInteractions[SharedData.random.nextInt(this.availableInteractions.length)] + " " + scoreChange);
-	}
 	/*
 	public String[][] generateRulesfo(SLDescription sl, ElapsedCpuTimer time) {
 		
@@ -565,20 +706,6 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		System.out.println(numOfInFeasible);
 		return fChromosomes.get(0).getRuleset();
 		
-		::
-		:
-		:
-		::
-		:
-		::
-		
-		
-		
-		
 	}*/
-	private String[] toStringArray(ArrayList<String> arlist) {
-		String[] str = new String[arlist.size()];
-		arlist.toArray(str);
-		return str;
-	}
+	
 }

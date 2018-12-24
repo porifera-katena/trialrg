@@ -66,14 +66,20 @@ public class TestRuleGeneration {
         
         String record = recordGameFile+seed+"const.txt";
     	RuleGenMachine.generateRules(game, level1, constructiveRuleGenerator, record, seed);
-        for(int i=0;i<5;i++) {
-        	seed = random.nextInt();
-        	record = recordGameFile+seed+".txt";
-        	RuleGenMachine.generateRules(game, level1, simEvoRuleGenerator, record, seed);
-        }
-        recordGameFile = generateRulePath + "boulderdash_ggame_-7866699101.txt";
-        RuleGenMachine.playOneGame(game, recordG
-        		ameFile, level1, recordActionsFile, seed);
+    	boolean generate = true;
+    	if (generate) {
+    		for(int i=0;i<5;i++) {
+            	seed = seed+1;
+            	record = recordGameFile+seed+".txt";
+            	//game = generateRulePath + "boulderdash_ggame_1988196601.txt";
+            	RuleGenMachine.generateRules(game, level1, simEvoRuleGenerator, record, seed);
+            }
+		}
+    	else {
+    		recordGameFile = generateRulePath + "boulderdash_ggame_1988196601.txt";
+            RuleGenMachine.playOneGame(game, recordGameFile, level1, recordActionsFile, seed);
+    	}
+        
         
     }
 
