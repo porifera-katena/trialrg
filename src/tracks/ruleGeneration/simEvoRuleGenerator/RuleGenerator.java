@@ -32,7 +32,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 	private ArrayList<SpriteData> fleeing;
 	private ArrayList<SpriteData> npc;
 	
-	private String target;
+	private String target = null;
 	
 	private String[] availableInteractions = new String[] { 
 			"killSprite", "killAll stype=<@stype@>", "killIfHasMore resource=<@resource@> limit=<@limit@>", "killIfHasLess resource=<@resource@> limit=<@limit@>",
@@ -214,7 +214,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				}
 			}
 		}
-		else if(resource.size()>0) {
+		if(resource.size()>0 && target == null) {
 			ArrayList<SpriteData> targetSprites = resource;
 			int j = SharedData.random.nextInt(targetSprites.size());
 			for(int i=0;i<targetSprites.size();i++) {
@@ -226,7 +226,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				}
 			}
 		}
-		else if(fleeing.size()>0) {
+		if(fleeing.size()>0 && target == null) {
 			ArrayList<SpriteData> targetSprites = fleeing;
 			int j = SharedData.random.nextInt(targetSprites.size());
 			for(int i=0;i<targetSprites.size();i++) {
@@ -238,12 +238,12 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				}
 			}
 		}
-		else if(npc.size()>0) {
+		if(npc.size()>0 && target == null) {
 			int i = SharedData.random.nextInt(npc.size());
 			terminations.add("SpriteCounter stype=" + npc.get(i).name + " limit=0 win=True");
 			target = npc.get(i).name;
 		}
-		else {
+		if(target == null){
 			target = usefulSprites.get(SharedData.random.nextInt(usefulSprites.size()));
 		}
 		terminations.add("SpriteCounter stype=" + avatar.get(0).name + " limit=0 win=False");
