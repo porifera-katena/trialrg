@@ -243,6 +243,9 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			terminations.add("SpriteCounter stype=" + npc.get(i).name + " limit=0 win=True");
 			target = npc.get(i).name;
 		}
+		else {
+			target = usefulSprites.get(SharedData.random.nextInt(usefulSprites.size()));
+		}
 		terminations.add("SpriteCounter stype=" + avatar.get(0).name + " limit=0 win=False");
 		/*door resource fleeing chaser bomber&Random&Spreader*/
 		for(int i=0;i<10;i++) {
