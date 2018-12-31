@@ -23,17 +23,17 @@ public class RuleGenerator extends AbstractRuleGenerator{
 	private ArrayList<Integer> numOfFeasible;
 	/** number of infeasible chromosomes across generations **/
 	private ArrayList<Integer> numOfInFeasible;
-	
+
 	private int InteractionNum = 8;
-	
+
 	private ArrayList<SpriteData> avatar;
 	private ArrayList<SpriteData> door;
 	private ArrayList<SpriteData> resource;
 	private ArrayList<SpriteData> fleeing;
 	private ArrayList<SpriteData> npc;
-	
+
 	private String target = null;
-	
+
 	private String[] availableInteractions = new String[] { 
 			"killSprite", "killAll stype=<@stype@>", "killIfHasMore resource=<@resource@> limit=<@limit@>", "killIfHasLess resource=<@resource@> limit=<@limit@>",
 			"killIfFromAbove", "killIfOtherHasMore resource=<@resource@> limit=<@limit@>", "spawnBehind stype=<@stype@>", "stepBack", "spawnIfHasMore stype=<@stype@> resource=<@resource@> limit=<@limit@>", "spawnIfHasLess stype=<@stype@> resource=<@resource@> limit=<@limit@>",
@@ -85,7 +85,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * This is an evolutionary rule generator
 	 * @param sl	contains information about sprites and current level
@@ -95,7 +95,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		SharedData.usefulSprites = new ArrayList<String>();
 		SharedData.random = new Random();
 		SharedData.la = new LevelAnalyzer(sl);
-		
+
 		String[][] currentLevel = sl.getCurrentLevel();
 		// Just get the useful sprites from the current level
 		for (int y = 0; y < currentLevel.length; y++) {
@@ -105,7 +105,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 					if (parts[i].trim().length() > 0) {
 						// Add the sprite if it doesn't exisit
 						if (!SharedData.usefulSprites.contains(parts[i].trim())) {
-						    SharedData.usefulSprites.add(parts[i].trim());
+							SharedData.usefulSprites.add(parts[i].trim());
 						}
 					}
 				}
@@ -116,7 +116,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		SharedData.constGen = new tracks.ruleGeneration.constructiveRuleGenerator.RuleGenerator(sl, time);
 		SharedData.constGen.generateRules(sl, time);
 	}
-	
+
 	/**
 	 * Generates the rules using evolution
 	 * @param sl	the SL description
@@ -125,9 +125,9 @@ public class RuleGenerator extends AbstractRuleGenerator{
 	@Override
 	public String[][] generateRules(SLDescription sl, ElapsedCpuTimer time) {
 		SpriteData[] sprites = sl.getGameSprites();
-		
+
 		ArrayList<String> usefulSprites = new ArrayList<String>();
-		
+
 		String[][] currentLevel = sl.getCurrentLevel();
 		// Just get the useful sprites from the current level
 		for (int y = 0; y < currentLevel.length; y++) {
@@ -143,7 +143,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				}
 			}
 		}
-		
+
 		boolean flag = true;
 		while(flag) {
 			flag = false;
@@ -163,11 +163,11 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			}
 		}
 		usefulSprites.add("EOS");
-		
+
 		for(String s:usefulSprites) {
 			System.out.println(s);
 		}
-		
+
 		avatar = new ArrayList<SpriteData>();
 		door = new ArrayList<SpriteData>();
 		resource = new ArrayList<SpriteData>();
@@ -196,12 +196,12 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			if(!usefulSprites.contains(s.name)) {
 				s = null;
 			}
-			
+
 		}
-		
+
 		ArrayList<String> terminations = new ArrayList<String>();
 		ArrayList<String> interactions = new ArrayList<String>();
-		
+
 		if(door.size()>0) {
 			ArrayList<SpriteData> targetSprites = door;
 			int j = SharedData.random.nextInt(targetSprites.size());
@@ -262,7 +262,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		}*/
 		String[][] r = {toStringArray(interactions),toStringArray(terminations)};
 		Chromosome bestChromosome = new Chromosome(r,sl);
-		 
+
 		double worstTime = 4 * SharedData.EVALUATION_TIME * InteractionNum;
 		double avgTime = worstTime;
 		double avgcalcFitTime = 4 * SharedData.EVALUATION_TIME;
@@ -270,7 +270,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		int calculateFitNum = 0;
 		int numberOfIterations = 0;
 		int mutatedInteractions[] = {-1,-1};
-		
+
 		// START EVO LOOP
 		ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
 		ArrayList<Chromosome> newChromosomes = new ArrayList<Chromosome>();
@@ -285,6 +285,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 					ArrayList<String> temp = new ArrayList<String>();
 					temp = (ArrayList<String>) interactions.clone();
 					temp.remove(i);
+					temp.add(avatar.get(0).name+" EOS > stepBack");
 					String[][] rules = {toStringArray(temp),toStringArray(terminations)};
 					Chromosome c = new Chromosome(rules,sl,i);
 					if(c.calculateFitnessLight(SharedData.EVALUATION_TIME)) {
@@ -301,13 +302,13 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			for (Chromosome c : newChromosomes) {
 				chromosomes.add(c);
 			}
-			
+
 			Collections.shuffle(chromosomes);
 			Collections.sort(chromosomes);
 			for(int i=0;i<2;i++) {
 				mutatedInteractions[i] = chromosomes.get(i).id;
 			}
-			
+
 			for(Chromosome c:chromosomes) {
 				System.out.print("[");
 				for(Double f:c.getFitness()) {
@@ -332,6 +333,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 					ArrayList<String> temp = new ArrayList<String>();
 					temp = (ArrayList<String>) interactions.clone();
 					temp.remove(mutatedInteractions[(i+1)%2]);
+					temp.add(avatar.get(0).name+" EOS > stepBack");
 					String[][] rules = {toStringArray(temp),toStringArray(terminations)};
 					c = new Chromosome(rules,sl,mutatedInteractions[(i+1)%2]);
 					if(c.calculateFitnessLight(SharedData.EVALUATION_TIME)) {
@@ -352,7 +354,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 					System.out.print("}");
 				}
 				newChromosomes.add(c);
-				
+
 			}
 			/***********************/
 			numberOfIterations += 1;
@@ -360,7 +362,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			avgTime = totalTime / numberOfIterations;
 			avgcalcFitTime = totalTime/calculateFitNum;
 		}
-		
+
 		for (int i = 0; i < 1; i++) {
 			interactions.set(chromosomes.get(i).id, "");
 		}
@@ -375,19 +377,19 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		//Chromosome c = new Chromosome(rules,sl,0);
 		//c.calculateFitness(0);
 		//System.out.println(c.getFitness());
-		
+
 		String[][] rules = bestChromosome.getRuleset();
-		
+
 		for(String[] lists:rules) {
 			for(String s:lists) {
 				System.out.println(s);
 			}
 		}
-		
+
 		return rules;
 	}
-	
-	
+
+
 	private String createInteraction(ArrayList<String> usefulSprites,int i) {
 		if (i==0) {
 			return createGoalInteraction(usefulSprites, target);
@@ -411,7 +413,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			interaction = interaction.replaceFirst("<@stype@>", usefulSprites.get(SharedData.random.nextInt(usefulSprites.size()-1)));
 		}
 		if (resource.size()>0) {
-		while (interaction.contains("<@resource@>")) {
+			while (interaction.contains("<@resource@>")) {
 				interaction = interaction.replaceFirst("<@resource@>", resource.get(SharedData.random.nextInt(resource.size())).name);
 			}
 		}
@@ -433,38 +435,41 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		System.out.println(interaction);
 		return interaction;
 	}
-	
+
 	private String createGoalInteraction(ArrayList<String> usefulSprites,String target) {
-		int i = SharedData.random.nextInt(usefulSprites.size());
-		String interaction = (target + " " + usefulSprites.get(i) + " > " +
-				this.availableKillingInteractions[SharedData.random.nextInt(this.availableKillingInteractions.length)]);
-		while (interaction.contains("<@stype@>")) {
-			interaction = interaction.replaceFirst("<@stype@>", target);
-		}
-		if (resource.size()>0) {
-		while (interaction.contains("<@resource@>")) {
-				interaction = interaction.replaceFirst("<@resource@>", resource.get(SharedData.random.nextInt(resource.size())).name);
+		String interaction = "";
+		do {
+			interaction = (target + " " + usefulSprites.get(SharedData.random.nextInt(usefulSprites.size())) + " > " +
+					this.availableKillingInteractions[SharedData.random.nextInt(this.availableKillingInteractions.length)]);
+			while (interaction.contains("<@stype@>")) {
+				interaction = interaction.replaceFirst("<@stype@>", target);
 			}
-		}
-		while (interaction.contains("<@limit@>")) {
-			interaction = interaction.replaceFirst("<@limit@>", ""+SharedData.random.nextInt(10));
-		}
-		while (interaction.contains("<@value@>")) {
-			interaction = interaction.replaceFirst("<@value@>", ""+SharedData.random.nextInt(10));
-		}
-		while (interaction.contains("<@bool@>")) {
-			if (SharedData.random.nextBoolean()) {
-				interaction = interaction.replaceFirst("<@bool@>", "true");
+			if (resource.size()>0) {
+				while (interaction.contains("<@resource@>")) {
+					interaction = interaction.replaceFirst("<@resource@>", resource.get(SharedData.random.nextInt(resource.size())).name);
+				}
 			}
-			else {
-				interaction = interaction.replaceFirst("<@bool@>", "false");
+			while (interaction.contains("<@limit@>")) {
+				interaction = interaction.replaceFirst("<@limit@>", ""+SharedData.random.nextInt(10));
 			}
-		}
+			while (interaction.contains("<@value@>")) {
+				interaction = interaction.replaceFirst("<@value@>", ""+SharedData.random.nextInt(10));
+			}
+			while (interaction.contains("<@bool@>")) {
+				if (SharedData.random.nextBoolean()) {
+					interaction = interaction.replaceFirst("<@bool@>", "true");
+				}
+				else {
+					interaction = interaction.replaceFirst("<@bool@>", "false");
+				}
+			}
+		}while(interaction.contains("<@"));
 		// add the new random interaction that doesn't produce errors
+		interaction = interaction + " scoreChange=10";
 		System.out.println(interaction);
 		return interaction;	
 	}
-	
+
 	private String[] toStringArray(ArrayList<String> arlist) {
 		String[] str = new String[arlist.size()];
 		arlist.toArray(str);
@@ -517,7 +522,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		numOfFeasible.add(fPopulation.size());
 		numOfInFeasible.add(iPopulation.size());
 
-		
+
 		// CLEANSING PART
 		// cleanse the population 
 		for(Chromosome c : fPopulation) {
@@ -526,7 +531,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		for(Chromosome c: iPopulation) {
 			c.cleanseChromosome();
 		}
-		
+
 		while(newPopulation.size() < SharedData.POPULATION_SIZE){
 			//choosing which population to work on with 50/50 probability
 			//of selecting either any of them
@@ -570,7 +575,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			else if(SharedData.random.nextDouble() < SharedData.MUTATION_PROB){
 				child2.mutate();
 			}
-			
+
 			//add the new children to the new population
 			newPopulation.add(child1);
 			newPopulation.add(child2);
@@ -610,7 +615,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 
 		return newPopulation;
 	}
-*/
+	  */
 	/**
 	 * Performs rank selection on the given population
 	 * @param population 	the population to be performed upon
@@ -635,10 +640,10 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		return population.get(0);
 
 	}*/
-	
+
 	/*
 	public String[][] generateRulesfo(SLDescription sl, ElapsedCpuTimer time) {
-		
+
 		//initialize the statistics objects
  		bestFitness = new ArrayList<Double>();
 		numOfFeasible = new ArrayList<Integer>();
@@ -648,7 +653,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		ArrayList<Chromosome> fChromosomes = new ArrayList<Chromosome>();
 		ArrayList<Chromosome> iChromosomes = new ArrayList<Chromosome>();
 		ArrayList<Chromosome> allChromosomes = new ArrayList<Chromosome>();
-		
+
 		allChromosomes.addAll(getFirstPopulation(sl, "tracks.ruleGeneration.constructiveRuleGenerator.RuleGenerator", 
 			(int)(SharedData.POPULATION_SIZE * SharedData.INIT_CONSTRUCT_PERCENT), 0));
 		allChromosomes.addAll(getFirstPopulation(sl, "tracks.ruleGeneration.randomRuleGenerator.RuleGenerator", 
@@ -662,7 +667,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		double avgTime = worstTime;
 		double totalTime = 0;
 		int numberOfIterations = 0;
-		
+
 		// START EVO LOOP
 		while(time.remainingTimeMillis() > 4 * avgTime && time.remainingTimeMillis() > worstTime){
 			ElapsedCpuTimer timer = new ElapsedCpuTimer();
@@ -708,7 +713,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		System.out.println(numOfFeasible);
 		System.out.println(numOfInFeasible);
 		return fChromosomes.get(0).getRuleset();
-		
+
 	}*/
-	
+
 }

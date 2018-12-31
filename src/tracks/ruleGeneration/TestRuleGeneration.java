@@ -10,6 +10,7 @@ public class TestRuleGeneration {
     public static void main(String[] args) throws Exception {
 	//Available Controllers
 	String sampleMCTSController = "tracks.singlePlayer.advanced.sampleMCTS.Agent";
+	String sampleOLETSController = "tracks.singlePlayer.advanced.olets.Agent";
 
         // Available Rule Generator
         String randomRuleGenerator = "tracks.ruleGeneration.randomRuleGenerator.RuleGenerator";
@@ -64,10 +65,11 @@ public class TestRuleGeneration {
         // 1. Generate rules (Interaction and Terminations) for a fixed level
         
         
-        String record = recordGameFile+seed+"const.txt";
-    	RuleGenMachine.generateRules(game, level1, constructiveRuleGenerator, record, seed);
+        
     	boolean generate = true;
     	if (generate) {
+    		String record = recordGameFile+seed+"const.txt";
+        	RuleGenMachine.generateRules(game, level1, constructiveRuleGenerator, record, seed);
     		for(int i=0;i<5;i++) {
             	seed = seed+1;
             	record = recordGameFile+seed+".txt";
@@ -76,8 +78,9 @@ public class TestRuleGeneration {
             }
 		}
     	else {
-    		recordGameFile = generateRulePath + "boulderdash_ggame_1988196601.txt";
-            RuleGenMachine.playOneGame(game, recordGameFile, level1, recordActionsFile, seed);
+    		recordGameFile = generateRulePath + "boulderdash_ggame_-1115206505.txt";
+            //RuleGenMachine.playOneGame(game, recordGameFile, level1, recordActionsFile, seed);
+            RuleGenMachine.runOneGame(game, recordGameFile, level1, true, sampleOLETSController, recordActionsFile, seed, 0);
     	}
         
         
