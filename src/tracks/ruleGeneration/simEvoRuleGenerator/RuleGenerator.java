@@ -380,12 +380,6 @@ public class RuleGenerator extends AbstractRuleGenerator{
 
 		String[][] rules = bestChromosome.getRuleset();
 
-		for(String[] lists:rules) {
-			for(String s:lists) {
-				System.out.println(s);
-			}
-		}
-
 		return rules;
 	}
 

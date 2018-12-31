@@ -213,7 +213,12 @@ public class RuleGenMachine
 					}
 				}
 			}
-
+			System.out.print("Seed = " + randomSeed);
+			for(String[] lists:rules) {
+				for(String s:lists) {
+					System.out.println(s);
+				}
+			}
 			saveGame(gameFile, modifiedFile, rules, msetStructure, msprites);
 		} catch (Exception e) {
 			toPlay.disqualify();

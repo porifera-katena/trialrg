@@ -72,6 +72,7 @@ public class TestRuleGeneration {
         	RuleGenMachine.generateRules(game, level1, constructiveRuleGenerator, record, seed);
     		for(int i=0;i<5;i++) {
             	seed = seed+1;
+            	
             	record = recordGameFile+seed+".txt";
             	//game = generateRulePath + "boulderdash_ggame_1988196601.txt";
             	RuleGenMachine.generateRules(game, level1, simEvoRuleGenerator, record, seed);
@@ -80,6 +81,7 @@ public class TestRuleGeneration {
     	else {
     		recordGameFile = generateRulePath + "boulderdash_ggame_-1115206505.txt";
             //RuleGenMachine.playOneGame(game, recordGameFile, level1, recordActionsFile, seed);
+    		
             RuleGenMachine.runOneGame(game, recordGameFile, level1, true, sampleOLETSController, recordActionsFile, seed, 0);
     	}
         
