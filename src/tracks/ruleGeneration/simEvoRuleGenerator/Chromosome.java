@@ -96,7 +96,7 @@ public class Chromosome implements Comparable<Chromosome>{
 	/**
 	 * Flips a coin to see if we mutate on termination or interaction
 	 */
-	public void mutate() {
+	/*public void mutate() {
 		// loop through as many times as we want to mutate
 		int mutationCount = SharedData.random.nextInt(SharedData.MUTATION_AMOUNT) + 1;
 		for(int i = 0; i < mutationCount; i++) {
@@ -109,13 +109,13 @@ public class Chromosome implements Comparable<Chromosome>{
 				mutateTermination();
 			}
 		}
-	}
+	}*/
 	/**
 	 * performs a mutation on a random interaction in the set
 	 * 4 types of mutation: insert a new rule, delete an old rule, change a rule, and change rule parameters (but keep the rule)
 	 * the interaction ruleset will shift back and forth between an array and an arraylist depending on the circumstances
 	 * according to what is easiest to manipulate at the time
-	 */
+	 *//*
 	public void mutateInteraction() {
 		ArrayList<String> interactionSet = new ArrayList<>( Arrays.asList(ruleset[0]));
 		double mutationType = SharedData.random.nextDouble();
@@ -323,14 +323,14 @@ public class Chromosome implements Comparable<Chromosome>{
 		else {
 			System.err.println("What?! How did we even get here!?");
 		}
-	}
+	}*/
 	/**
 	 * performs a mutation on a random termination in the set
 	 * 4 types of mutation: insert a new rule, delete an old rule, change a rule, and change rule parameters (but keep the rule)
 	 * the termination ruleset will shift back and forth between an array and an arraylist depending on the circumstances
 	 * according to what is easiest to manipulate at the time. 
 	 */
-	public void mutateTermination() {
+	/*	public void mutateTermination() {
 		ArrayList<String> terminationSet = new ArrayList<>( Arrays.asList(ruleset[1]));
 		double mutationType = SharedData.random.nextDouble();
 		// we do an insertion
@@ -609,7 +609,7 @@ public class Chromosome implements Comparable<Chromosome>{
 		}
 
 
-	}
+	}*/
 	/**
 	 * clone the chromosome data
 	 */
@@ -916,8 +916,18 @@ public class Chromosome implements Comparable<Chromosome>{
 			int bestSolutionSize = 0;
 			for(int i=0; i<SharedData.REPETITION_AMOUNT; i++){
 				StateObservation tempState = stateObs.copy();
-				cleanOpenloopAgents();
-				int temp = getAgentResult(tempState, SharedData.EVALUATION_STEP_COUNT, SharedData.automatedAgent);
+				int temp=0;
+				try {
+					cleanOpenloopAgents();
+					temp = getAgentResult(tempState, SharedData.EVALUATION_STEP_COUNT, SharedData.automatedAgent);
+				}catch (Exception e) {
+					constrainFitness = 0.0;
+					this.fitness.set(0, constrainFitness);
+					this.fitness.set(1, 0.0);
+					this.fitness.set(2, 0.0);
+					return false;
+				}
+
 				// add temp to framesCount
 				frameCount += temp;
 
@@ -960,12 +970,22 @@ public class Chromosome implements Comparable<Chromosome>{
 				for(int j=0;j<SharedData.REPETITION_AMOUNT;j++) {
 					StateObservation tempState = stateObs.copy();
 					int temp = 0;
-					if (i==0) {
-						temp = getAgentResult(tempState, bestSolutionSize, SharedData.randomAgent);
+					try{
+						if (i==0) {
+							temp = getAgentResult(tempState, bestSolutionSize, SharedData.randomAgent);
+						}
+						else {
+							temp = getSimpleResult(tempState, bestSolutionSize, stateObs.getAvailableActions(true).get(i-1));
+						}
+					}catch (Exception e) {
+						constrainFitness = 0.0;
+						this.fitness.set(0, constrainFitness);
+						this.fitness.set(1, 0.0);
+						this.fitness.set(2, 0.0);
+						return false;
 					}
-					else {
-						temp = getSimpleResult(tempState, bestSolutionSize, stateObs.getAvailableActions(true).get(i-1));	
-					}
+
+
 					randomState = tempState;
 
 					score = randomState.getGameScore();
@@ -1260,6 +1280,11 @@ public void calculateFitness2(long time) {
 	private int getAgentResult(StateObservation stateObs, int steps, AbstractPlayer agent){
 		int i =0;
 		int k = 0;
+		try {
+
+		}catch (Exception e) {
+			// TODO: handle exception
+		}
 		for(i=0;i<steps;i++){
 			if(stateObs.isGameOver()){
 				break;

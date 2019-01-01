@@ -70,7 +70,7 @@ public class TestRuleGeneration {
     	if (generate) {
     		String record = recordGameFile+seed+"const.txt";
         	RuleGenMachine.generateRules(game, level1, constructiveRuleGenerator, record, seed);
-    		for(int i=0;i<5;i++) {
+    		for(int i=0;i<10;i++) {
             	seed = seed+1;
             	
             	record = recordGameFile+seed+".txt";
