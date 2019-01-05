@@ -395,37 +395,40 @@ public class RuleGenerator extends AbstractRuleGenerator{
 	}
 
 	private String createInteraction(ArrayList<String> usefulSprites) {
-		int i1 = SharedData.random.nextInt(usefulSprites.size());
-		int i2 = (i1 + 1 + SharedData.random.nextInt(usefulSprites.size() - 1)) % usefulSprites.size();
-		// add score change parameter for interactions
-		String scoreChange = "";
-		if(SharedData.random.nextBoolean()){
-			scoreChange += "scoreChange=" + (SharedData.random.nextInt(5) - 2)+" ";
-		}
-		String interaction = (usefulSprites.get(i1) + " " + usefulSprites.get(i2) + " > " +
-				this.availableInteractions[SharedData.random.nextInt(this.availableInteractions.length)] + " " + scoreChange);
-		while (interaction.contains("<@stype@>")) {
-			interaction = interaction.replaceFirst("<@stype@>", usefulSprites.get(SharedData.random.nextInt(usefulSprites.size()-1)));
-		}
-		if (resource.size()>0) {
-			while (interaction.contains("<@resource@>")) {
-				interaction = interaction.replaceFirst("<@resource@>", resource.get(SharedData.random.nextInt(resource.size())).name);
+		String interaction = "";
+		do {
+			int i1 = SharedData.random.nextInt(usefulSprites.size());
+			int i2 = (i1 + 1 + SharedData.random.nextInt(usefulSprites.size() - 1)) % usefulSprites.size();
+			// add score change parameter for interactions
+			String scoreChange = "";
+			if(SharedData.random.nextBoolean()){
+				scoreChange += "scoreChange=" + (SharedData.random.nextInt(5) - 2)+" ";
 			}
-		}
-		while (interaction.contains("<@limit@>")) {
-			interaction = interaction.replaceFirst("<@limit@>", ""+SharedData.random.nextInt(10));
-		}
-		while (interaction.contains("<@value@>")) {
-			interaction = interaction.replaceFirst("<@value@>", ""+SharedData.random.nextInt(10));
-		}
-		while (interaction.contains("<@bool@>")) {
-			if (SharedData.random.nextBoolean()) {
-				interaction = interaction.replaceFirst("<@bool@>", "true");
+			interaction = (usefulSprites.get(i1) + " " + usefulSprites.get(i2) + " > " +
+					this.availableInteractions[SharedData.random.nextInt(this.availableInteractions.length)] + " " + scoreChange);
+			while (interaction.contains("<@stype@>")) {
+				interaction = interaction.replaceFirst("<@stype@>", usefulSprites.get(SharedData.random.nextInt(usefulSprites.size()-1)));
 			}
-			else {
-				interaction = interaction.replaceFirst("<@bool@>", "false");
+			if (resource.size()>0) {
+				while (interaction.contains("<@resource@>")) {
+					interaction = interaction.replaceFirst("<@resource@>", resource.get(SharedData.random.nextInt(resource.size())).name);
+				}
 			}
-		}
+			while (interaction.contains("<@limit@>")) {
+				interaction = interaction.replaceFirst("<@limit@>", ""+SharedData.random.nextInt(10));
+			}
+			while (interaction.contains("<@value@>")) {
+				interaction = interaction.replaceFirst("<@value@>", ""+SharedData.random.nextInt(10));
+			}
+			while (interaction.contains("<@bool@>")) {
+				if (SharedData.random.nextBoolean()) {
+					interaction = interaction.replaceFirst("<@bool@>", "true");
+				}
+				else {
+					interaction = interaction.replaceFirst("<@bool@>", "false");
+				}
+			}
+		}while(interaction.contains("<@"));
 		// add the new random interaction that doesn't produce errors
 		System.out.println(interaction);
 		return interaction;
