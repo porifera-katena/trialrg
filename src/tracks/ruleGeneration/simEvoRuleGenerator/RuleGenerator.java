@@ -258,8 +258,19 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				sl.testRules(toStringArray(interactions),toStringArray(terminations));
 			}
 		}
-		/*for(Types.ACTIONS a:sl.testRules(toStringArray(interactions),toStringArray(terminations)).getAvailableActions()){
-			System.out.println("("+a+")");
+		/*for (int i = 0; i < InteractionNum; i++) {
+			ArrayList<String> temp = new ArrayList<String>();
+			temp = (ArrayList<String>) interactions.clone();
+			temp.remove(i);
+			temp.add(avatar.get(0).name+" EOS > stepBack");
+			String[][] rules = {toStringArray(temp),toStringArray(terminations)};
+			Chromosome c = new Chromosome(rules,sl,i);
+			if(c.calculateFitnessLight(SharedData.EVALUATION_TIME)) {
+				break;
+			}
+			chromosomes.add(c);
+			System.out.print("*");
+
 		}*/
 		String[][] r = {toStringArray(interactions),toStringArray(terminations)};
 		Chromosome bestChromosome = new Chromosome(r,sl);
@@ -270,16 +281,17 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		double totalTime = 0;
 		int calculateFitNum = 0;
 		int numberOfIterations = 0;
+		int numberOfGoodGens = 0;
 		int mutatedInteractions[] = {-1,-1};
 
 		// START EVO LOOP
 		ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
 		ArrayList<Chromosome> newChromosomes = new ArrayList<Chromosome>();
 		Logger.getInstance().active = false;
-		while(time.remainingTimeMillis() > 4 * avgTime && time.remainingTimeMillis() > worstTime && time.remainingTimeMillis() > InteractionNum * avgcalcFitTime * 2){
+		while(time.remainingTimeMillis() > 4 * avgTime && time.remainingTimeMillis() > worstTime && (time.remainingTimeMillis() > InteractionNum * avgcalcFitTime * 2 || calculateFitNum == 0)){
 			int remainingcalcFitTime = (int) ( (time.remainingTimeMillis() / avgcalcFitTime) - InteractionNum*2);
 			ElapsedCpuTimer timer = new ElapsedCpuTimer();
-			System.out.println("Generation #" + (numberOfIterations + 1) + ": ");
+			System.out.println("Generation #" + (numberOfIterations + 1) + "(" + numberOfGoodGens + ")" + ": ");
 			chromosomes.clear();
 			for (int i = 0; i < InteractionNum; i++) {
 				if(mutatedInteractions[0]!=i && mutatedInteractions[1]!=i) {
@@ -359,9 +371,13 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			}
 			/***********************/
 			numberOfIterations += 1;
-			totalTime += timer.elapsedMillis();
-			avgTime = totalTime / numberOfIterations;
-			avgcalcFitTime = totalTime/calculateFitNum;
+			if(calculateFitNum != 0) {
+				numberOfGoodGens++;
+				totalTime += timer.elapsedMillis();
+				avgTime = totalTime / numberOfGoodGens;
+				avgcalcFitTime = totalTime/calculateFitNum;
+			}
+			
 		}
 
 		for (int i = 0; i < 1; i++) {
