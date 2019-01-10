@@ -1,4 +1,4 @@
-package tracks.ruleGeneration.simEvoRuleGenerator;
+package tracks.ruleGeneration.climbRuleGenerator;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 	private ArrayList<SpriteData> npc;
 
 	private String target = null;
-	
+
 	public boolean LoopFlag=true;
 
 	private String[] availableInteractions = new String[] { 
@@ -275,12 +275,9 @@ public class RuleGenerator extends AbstractRuleGenerator{
 
 		}*/
 		String[][] r = {toStringArray(interactions),toStringArray(terminations)};
-		
-		if(LoopFlag==false) {
-			return r;
-		}
-		
+
 		Chromosome bestChromosome = new Chromosome(r,sl);
+		bestChromosome.calculateFitnessLight(SharedData.EVALUATION_TIME);
 
 		double worstTime = 4 * SharedData.EVALUATION_TIME * InteractionNum;
 		double avgTime = worstTime;
@@ -292,91 +289,31 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		int mutatedInteractions[] = {-1,-1};
 
 		// START EVO LOOP
-		ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
-		ArrayList<Chromosome> newChromosomes = new ArrayList<Chromosome>();
+		//ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
+		//ArrayList<Chromosome> newChromosomes = new ArrayList<Chromosome>();
 		Logger.getInstance().active = false;
 		while(time.remainingTimeMillis() > 4 * avgTime && time.remainingTimeMillis() > worstTime && (time.remainingTimeMillis() > InteractionNum * avgcalcFitTime * 2 || calculateFitNum == 0)){
 			int remainingcalcFitTime = (int) ( (time.remainingTimeMillis() / avgcalcFitTime) - InteractionNum*2);
 			ElapsedCpuTimer timer = new ElapsedCpuTimer();
 			System.out.println("Generation #" + (numberOfIterations + 1) + "(" + numberOfGoodGens + ")" + ": ");
-			chromosomes.clear();
 			for (int i = 0; i < InteractionNum; i++) {
 				//if(mutatedInteractions[0]!=i && mutatedInteractions[1]!=i) {
-					ArrayList<String> temp = new ArrayList<String>();
-					temp = (ArrayList<String>) interactions.clone();
-					temp.remove(i);
-					temp.add(avatar.get(0).name+" EOS > stepBack");
-					String[][] rules = {toStringArray(temp),toStringArray(terminations)};
-					Chromosome c = new Chromosome(rules,sl,i);
-					if(c.calculateFitnessLight(SharedData.EVALUATION_TIME)) {
-						calculateFitNum++;
-					}
-					chromosomes.add(c);
-					if(bestChromosome.compareTo(c)<0) {
-						bestChromosome = c;
-					}
-					System.out.print("*");
+				ArrayList<String> temp = (ArrayList<String>) interactions.clone();
+				int id = SharedData.random.nextInt(temp.size());
+				temp.set(id,createInteraction(usefulSprites, id));
+				temp.add(avatar.get(0).name+" EOS > stepBack");
+				String[][] rules = {toStringArray(temp),toStringArray(terminations)};
+				Chromosome c = new Chromosome(rules,sl,i);
+				if(c.calculateFitnessLight(SharedData.EVALUATION_TIME)) {
+					calculateFitNum++;
+				}
+				if(bestChromosome.compareTo(c)<0) {
+					bestChromosome = c;
+				}
+				System.out.print("*");
 				//}
 			}
 			System.out.println();
-			/*for (Chromosome c : newChromosomes) {
-				chromosomes.add(c);
-			}*/
-
-			Collections.shuffle(chromosomes);
-			Collections.sort(chromosomes);
-			for(int i=0;i<2;i++) {
-				mutatedInteractions[i] = chromosomes.get(i).id;
-			}
-
-			for(Chromosome c:chromosomes) {
-				System.out.print("[");
-				for(Double f:c.getFitness()) {
-					System.out.print(f+",");
-				}
-				System.out.print("]");
-			}
-			System.out.println();
-			/******************************/
-			newChromosomes.clear();
-			for (int i = 0; i < 1; i++) {
-				Chromosome c = null;
-				//Chromosome worst = chromosomes.get(InteractionNum-1);
-				Chromosome worst = chromosomes.get(0);
-				for(int j=0;j<remainingcalcFitTime;j++) {
-					System.out.print(i);
-					interactions.set(mutatedInteractions[i], createInteraction(usefulSprites,mutatedInteractions[i]));
-					sl.testRules(toStringArray(interactions),toStringArray(terminations));
-					while(sl.getErrors().size() > 0){
-						interactions.set(mutatedInteractions[i], createInteraction(usefulSprites,mutatedInteractions[i]));
-						sl.testRules(toStringArray(interactions),toStringArray(terminations));
-					}
-					ArrayList<String> temp = new ArrayList<String>();
-					temp = (ArrayList<String>) interactions.clone();
-					//temp.remove(mutatedInteractions[(i+1)%2]);
-					temp.add(avatar.get(0).name+" EOS > stepBack");
-					String[][] rules = {toStringArray(temp),toStringArray(terminations)};
-					c = new Chromosome(rules,sl,-1);
-					if(c.calculateFitnessLight(SharedData.EVALUATION_TIME)) {
-						calculateFitNum++;
-					}
-					if(bestChromosome.compareTo(c)<0) {
-						bestChromosome = c;
-					}
-					System.out.print("c="+worst.compareTo(c)+" ");
-					if (worst.compareTo(c)>0) {
-						remainingcalcFitTime = remainingcalcFitTime - (j+1);
-						break;
-					}
-					System.out.print("{");
-					for(Double f:c.getFitness()) {
-						System.out.print(f+",");
-					}
-					System.out.print("}");
-				}
-				//newChromosomes.add(c);
-
-			}
 			/***********************/
 			numberOfIterations += 1;
 			if(calculateFitNum != 0) {
@@ -385,11 +322,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				avgTime = totalTime / numberOfGoodGens;
 				avgcalcFitTime = totalTime/calculateFitNum;
 			}
-			
-		}
 
-		for (int i = 0; i < 1; i++) {
-			interactions.set(chromosomes.get(i).id, "");
 		}
 		/*
 		for(String s:interactions) {

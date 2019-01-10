@@ -1,5 +1,6 @@
 package tracks.ruleGeneration.geneticRuleGenerator;
 
+
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,6 +12,8 @@ import core.generator.AbstractRuleGenerator;
 import core.player.AbstractPlayer;
 import tools.ElapsedCpuTimer;
 import tools.LevelAnalyzer;
+
+import tracks.ruleGeneration.simEvoRuleGenerator.*;
 
 public class RuleGenerator extends AbstractRuleGenerator{
 	/** The best chromosome fitness across generations **/
@@ -112,6 +115,30 @@ public class RuleGenerator extends AbstractRuleGenerator{
 	    	}
     	 	return chromosomes;
 	}
+	
+	private ArrayList<Chromosome> getFirstPopulation(SLDescription sl, String name, int amount, int mutations,Boolean flag){
+    	ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
+    	try{
+    	    	/*Class genClass = Class.forName(name);
+    	    	Constructor genConst = genClass.getConstructor(new Class[]{SLDescription.class, ElapsedCpuTimer.class});
+    	    	AbstractRuleGenerator ruleGen = (AbstractRuleGenerator)genConst.newInstance(sl, null);*/
+    			tracks.ruleGeneration.simEvoRuleGenerator.RuleGenerator ruleGen = new tracks.ruleGeneration.simEvoRuleGenerator.RuleGenerator(sl,null);
+    	    	ruleGen.LoopFlag = flag;
+        	 	for(int i = 0; i < amount; i++) {
+    	 		Chromosome c = new Chromosome(ruleGen.generateRules(sl, null), sl);
+    	 		c.cleanseChromosome();
+    	 		c.calculateFitness(SharedData.EVALUATION_TIME);
+    	 		for(int j = 0; j < mutations; j++) {
+    				c.mutate();
+    			}
+    	 		chromosomes.add(c);
+    	 	}
+    	}
+    	catch(Exception e){
+    	    e.printStackTrace();
+    	}
+	 	return chromosomes;
+}
 	
 	/**
 	 * Get the next population based on the current feasible infeasible population
@@ -274,12 +301,12 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		ArrayList<Chromosome> iChromosomes = new ArrayList<Chromosome>();
 		ArrayList<Chromosome> allChromosomes = new ArrayList<Chromosome>();
 		
-		allChromosomes.addAll(getFirstPopulation(sl, "tracks.ruleGeneration.constructiveRuleGenerator.RuleGenerator", 
-			(int)(SharedData.POPULATION_SIZE * SharedData.INIT_CONSTRUCT_PERCENT), 0));
+		allChromosomes.addAll(getFirstPopulation(sl, "tracks.ruleGeneration.simEvoRuleGenerator.RuleGenerator", 
+			(int)(SharedData.POPULATION_SIZE * SharedData.INIT_CONSTRUCT_PERCENT),0,false));
 		allChromosomes.addAll(getFirstPopulation(sl, "tracks.ruleGeneration.randomRuleGenerator.RuleGenerator", 
 			(int)(SharedData.POPULATION_SIZE * SharedData.INIT_RANDOM_PERCENT), 0));
-		allChromosomes.addAll(getFirstPopulation(sl, "tracks.ruleGeneration.constructiveRuleGenerator.RuleGenerator", 
-			(int)(SharedData.POPULATION_SIZE * SharedData.INIT_MUT_PERCENT), SharedData.INIT_MUTATION_AMOUNT));
+		allChromosomes.addAll(getFirstPopulation(sl, "tracks.ruleGeneration.simEvoGenerator.RuleGenerator", 
+			(int)(SharedData.POPULATION_SIZE * SharedData.INIT_MUT_PERCENT), SharedData.INIT_MUTATION_AMOUNT,false));
 
 
 		//some variables to make sure not getting out of time

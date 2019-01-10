@@ -48,7 +48,7 @@ public class TestRuleGeneration {
         boolean visuals = true;
         Random random = new Random();
         int seed = random.nextInt();
-        int gameIdx = 0;
+        int gameIdx = 11;
         int levelIdx = 1;
         
         String recordActionsFile = "actions_" + games[gameIdx] + "_lvl" + levelIdx + "_" + seed + ".txt";
@@ -79,10 +79,16 @@ public class TestRuleGeneration {
             }
 		}
     	else {
-    		recordGameFile = generateRulePath + "boulderdash_ggame_-1115206505.txt";
-            //RuleGenMachine.playOneGame(game, recordGameFile, level1, recordActionsFile, seed);
+    		//recordGameFile = generateRulePath + "boulderdash_ggame_-1115206505.txt";
+           for(int j=0;j<6;j++) {
+        	   recordGameFile = "examples/generatedgame/sim/" + "solarfox_ggame_34345473"+ j + ".txt";
+       		for(int i=-0;i<1;i++) {
+
+       			RuleGenMachine.runOneGame(game, recordGameFile, level1, true, sampleOLETSController, recordActionsFile, seed, 0);
+       		}
+           }
     		
-            RuleGenMachine.runOneGame(game, recordGameFile, level1, true, sampleOLETSController, recordActionsFile, seed, 0);
+    		//RuleGenMachine.playOneGame(game, recordGameFile, level1, recordActionsFile, seed);
     	}
         
         

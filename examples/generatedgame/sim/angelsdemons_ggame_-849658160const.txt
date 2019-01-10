@@ -1,0 +1,52 @@
+BasicGame
+    SpriteSet
+        collectible >
+            trunk > Immovable  img=newset/cloud1 color=BROWN
+            box > Passive  img=newset/cloud2 shrinkfactor=0.8
+            bolt > Missile  orientation=DOWN img=oryx/firedown1 color=RED speed=0.2
+        harmful >
+            demon > Bomber  prob=0.15 frameRate=8 img=oryx/devil1 stype=bolt cooldown=6 speed=0.4
+            angel > Bomber  prob=0.05 frameRate=8 img=oryx/angel1 stype=salvation cooldown=6 speed=0.45
+            salvation > Missile  orientation=DOWN img=oryx/icedown1 color=RED speed=0.2
+        sky > Immovable  img=oryx/backLBlue
+        citizen > Chaser  img=newset/man2 stype=output speed=0.4
+        cursed > Immovable  img=newset/cursedman color=YELLOW
+        blessed > Chaser  img=newset/blessedman stype=output speed=0.4
+        avatar > MovingAvatar  frameRate=10 img=newset/girl4
+        output > Immovable  img=oryx/dooropen1 portal=True
+        input > SpawnPoint  img=oryx/dooropen1 stype=citizen cooldown=16 portal=True
+        wall > Immovable  img=oryx/wall3 autotiling=True
+    InteractionSet
+        trunk avatar > killSprite scoreChange=1
+        avatar demon > killSprite
+        bolt avatar > killSprite scoreChange=1
+        avatar angel > killSprite
+        salvation avatar > killSprite scoreChange=1
+        output citizen > transformTo stype=citizen
+        output blessed > killSprite
+        input avatar > killSprite
+        output avatar > killSprite
+        box avatar > killSprite scoreChange=1
+        bolt avatar > killSprite scoreChange=1
+        avatar salvation > killSprite
+        avatar EOS > stepBack
+        box EOS > flipDirection
+        bolt EOS > flipDirection
+        salvation EOS > flipDirection
+        demon EOS > flipDirection
+        angel EOS > flipDirection
+        citizen EOS > flipDirection
+        blessed EOS > flipDirection
+    LevelMapping
+        d > sky demon
+        a > sky angel
+        t > sky trunk
+        x > sky box
+        i > sky input
+        o > sky output
+        . > sky
+        w > wall
+        A > sky avatar
+    TerminationSet
+        SpriteCounter stype=collectible limit=0 win=True
+        SpriteCounter stype=avatar limit=0 win=False
