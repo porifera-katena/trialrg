@@ -309,8 +309,13 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				}
 				if(bestChromosome.compareTo(c)<0) {
 					bestChromosome = c;
+					
 				}
-				System.out.print("*");
+				System.out.print("[");
+				for(Double f:c.getFitness()) {
+					System.out.print(f+",");
+				}
+				System.out.print("]");
 				//}
 			}
 			System.out.println();

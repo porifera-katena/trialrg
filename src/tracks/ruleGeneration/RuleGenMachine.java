@@ -316,7 +316,7 @@ public class RuleGenMachine
 
 		String[][] rules = generator.generateRules(sl, ect.copy());
 
-		if (ect.exceededMaxTime()) {
+		/*if (ect.exceededMaxTime()) {
 			long exceeded = -ect.remainingTimeMillis();
 
 			if (ect.elapsedMillis() > CompetitionParameters.LEVEL_ACTION_TIME_DISQ) {
@@ -328,7 +328,7 @@ public class RuleGenMachine
 				System.out.println("Overspent: " + "(exceeding " + (exceeded) + "ms): applying Empty Level.");
 				rules = new String[1][1];
 			}
-		}
+		}*/
 
 		return rules;
 	}
