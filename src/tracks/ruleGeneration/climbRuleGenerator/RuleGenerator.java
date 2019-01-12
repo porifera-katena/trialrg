@@ -296,28 +296,28 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			int remainingcalcFitTime = (int) ( (time.remainingTimeMillis() / avgcalcFitTime) - InteractionNum*2);
 			ElapsedCpuTimer timer = new ElapsedCpuTimer();
 			System.out.println("Generation #" + (numberOfIterations + 1) + "(" + numberOfGoodGens + ")" + ": ");
-			for (int i = 0; i < InteractionNum; i++) {
-				//if(mutatedInteractions[0]!=i && mutatedInteractions[1]!=i) {
-				ArrayList<String> temp = (ArrayList<String>) interactions.clone();
-				int id = SharedData.random.nextInt(temp.size());
-				temp.set(id,createInteraction(usefulSprites, id));
-				temp.add(avatar.get(0).name+" EOS > stepBack");
-				String[][] rules = {toStringArray(temp),toStringArray(terminations)};
-				Chromosome c = new Chromosome(rules,sl,i);
-				if(c.calculateFitnessLight(SharedData.EVALUATION_TIME)) {
-					calculateFitNum++;
-				}
-				if(bestChromosome.compareTo(c)<0) {
-					bestChromosome = c;
-					
-				}
-				System.out.print("[");
-				for(Double f:c.getFitness()) {
-					System.out.print(f+",");
-				}
-				System.out.print("]");
-				//}
+			//for (int i = 0; i < InteractionNum; i++) {
+			//if(mutatedInteractions[0]!=i && mutatedInteractions[1]!=i) {
+			ArrayList<String> temp = (ArrayList<String>) interactions.clone();
+			int id = SharedData.random.nextInt(temp.size());
+			temp.set(id,createInteraction(usefulSprites, id));
+			temp.add(avatar.get(0).name+" EOS > stepBack");
+			String[][] rules = {toStringArray(temp),toStringArray(terminations)};
+			Chromosome c = new Chromosome(rules,sl);
+			if(c.calculateFitnessLight(SharedData.EVALUATION_TIME)) {
+				calculateFitNum++;
 			}
+			if(bestChromosome.compareTo(c)<0) {
+				bestChromosome = c;
+
+			}
+			System.out.print("[");
+			for(Double f:c.getFitness()) {
+				System.out.print(f+",");
+			}
+			System.out.print("]");
+			//}
+			//}
 			System.out.println();
 			/***********************/
 			numberOfIterations += 1;

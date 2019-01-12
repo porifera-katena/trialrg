@@ -293,7 +293,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 
 		// START EVO LOOP
 		ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
-		ArrayList<Chromosome> newChromosomes = new ArrayList<Chromosome>();
+		//ArrayList<Chromosome> newChromosomes = new ArrayList<Chromosome>();
 		Logger.getInstance().active = false;
 		while(time.remainingTimeMillis() > 4 * avgTime && time.remainingTimeMillis() > worstTime && (time.remainingTimeMillis() > InteractionNum * avgcalcFitTime * 2 || calculateFitNum == 0)){
 			int remainingcalcFitTime = (int) ( (time.remainingTimeMillis() / avgcalcFitTime) - InteractionNum*2);
@@ -338,21 +338,30 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			}
 			System.out.println();
 			/******************************/
-			newChromosomes.clear();
+			//newChromosomes.clear();
 			for (int i = 0; i < 1; i++) {
 				Chromosome c = null;
 				//Chromosome worst = chromosomes.get(InteractionNum-1);
 				Chromosome worst = chromosomes.get(0);
 				for(int j=0;j<remainingcalcFitTime;j++) {
-					System.out.print(i);
-					interactions.set(mutatedInteractions[i], createInteraction(usefulSprites,mutatedInteractions[i]));
-					sl.testRules(toStringArray(interactions),toStringArray(terminations));
-					while(sl.getErrors().size() > 0){
-						interactions.set(mutatedInteractions[i], createInteraction(usefulSprites,mutatedInteractions[i]));
-						sl.testRules(toStringArray(interactions),toStringArray(terminations));
+					int id = chromosomes.get(0).id;
+					for(int k=0;k<chromosomes.size();k++) {
+						if(SharedData.random.nextInt(10)>1) {
+							id = chromosomes.get(k).id;
+							break;
+						}
 					}
+					
+					//System.out.print(i);
 					ArrayList<String> temp = new ArrayList<String>();
 					temp = (ArrayList<String>) interactions.clone();
+					temp.set(id, createInteraction(usefulSprites,id));
+					sl.testRules(toStringArray(temp),toStringArray(terminations));
+					while(sl.getErrors().size() > 0){
+						temp.set(id, createInteraction(usefulSprites,id));
+						sl.testRules(toStringArray(temp),toStringArray(terminations));
+					}
+					
 					//temp.remove(mutatedInteractions[(i+1)%2]);
 					temp.add(avatar.get(0).name+" EOS > stepBack");
 					String[][] rules = {toStringArray(temp),toStringArray(terminations)};
@@ -366,6 +375,8 @@ public class RuleGenerator extends AbstractRuleGenerator{
 					System.out.print("c="+worst.compareTo(c)+" ");
 					if (worst.compareTo(c)>0) {
 						remainingcalcFitTime = remainingcalcFitTime - (j+1);
+						interactions = temp;
+						interactions.remove(interactions.size()-1);
 						break;
 					}
 					System.out.print("{");

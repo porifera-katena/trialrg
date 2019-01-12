@@ -80,8 +80,8 @@ public class TestRuleGeneration {
 		if(true) {
 			for(int i=0;i<100;i++){
 				gameIdx = i%gameIds.length;
-				game = generateRulePath + games[gameIdx] + ".txt";
-				level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx + ".txt";
+				game = generateRulePath + games[gameIds[gameIdx]] + ".txt";
+				level1 = gamesPath + games[gameIds[gameIdx]] + "_lvl" + levelIdx + ".txt";
 				
 				for(int j=0;j<Generators.length;j++) {
 					seed = seed+1;
@@ -90,7 +90,7 @@ public class TestRuleGeneration {
 					Generator = generatorPath + Generators[j] + generatorClass;
 
 					
-					recordGameFile = generateRulePath + games[gameIdx] + "_" + Generators[j] + "_" + seed + ".txt";
+					recordGameFile = generateRulePath + games[gameIds[gameIdx]] + "_" + Generators[j] + "_" + seed + ".txt";
 
 					try {
 						RuleGenMachine.generateRules(game, level1, Generator, recordGameFile, seed);
@@ -111,7 +111,7 @@ public class TestRuleGeneration {
 
 					record = recordGameFile+seed+".txt";
 					//game = generateRulePath + "boulderdash_ggame_1988196601.txt";
-					RuleGenMachine.generateRules(game, level1, simEvoRuleGenerator, record, seed);
+					RuleGenMachine.generateRules(game, level1, generatorPath + Generators[1] + generatorClass, record, seed);
 				}
 			}
 			else {
