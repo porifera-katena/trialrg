@@ -1,5 +1,9 @@
 package tracks.ruleGeneration;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.Random;
 
 import tracks.ruleGeneration.climbRuleGenerator.SharedData;
@@ -13,6 +17,7 @@ public class TestRuleGeneration {
 		//Available Controllers
 		String sampleMCTSController = "tracks.singlePlayer.advanced.sampleMCTS.Agent";
 		String sampleOLETSController = "tracks.singlePlayer.advanced.olets.Agent";
+		String simpleRandomController = "tracks.singlePlayer.simple.simpleRandom.Agent";
 
 		// Available Rule Generator
 
@@ -76,8 +81,51 @@ public class TestRuleGeneration {
 		String Generators[] = {"genetic","simEvo","climb"};
 		String Generator = "";
 		int gameIds[] = {0,11,76};
+		
+		for(int i=0;i<gameIds.length;i++) {
+			File file = new File("C:\\"+games[gameIds[i]]);
+	        File files[] = file.listFiles();
+	        for(File f:files) {
+	        	String filename = f.getName();
+	        	int genId = -1;
+	        	for(int j=0;j<Generators.length;j++) {
+	        		if(filename.contains(Generators[j])) {
+	        			genId = j;
+	        		}
+	        	}
+	        	
+	        	game = generateRulePath + games[gameIds[i]] + ".txt";
+				level1 = gamesPath + games[gameIds[i]] + "_lvl" + levelIdx + ".txt";
+				recordActionsFile = "actions_" + games[gameIds[i]] + "_lvl" + levelIdx + "_" + random.nextInt() + ".txt";
+				FileWriter fw = new FileWriter("C:\\"+games[gameIds[i]]+"\result"+games[gameIds[i]]+".txt", true);
+				PrintWriter pw = new PrintWriter(new BufferedWriter(fw));
+				
+	        	for(int j=0;j<10;j++) {
+	        		seed = random.nextInt();
+	        		double[] result = RuleGenMachine.runOneGame(game, f.getAbsolutePath(), level1, false, sampleOLETSController, recordActionsFile, seed, 0);
+	        		for(double d:result) {
+	        			pw.print(d+",");
+	        		}
+	        		pw.print(":");
+	        		result = RuleGenMachine.runOneGame(game, f.getAbsolutePath(), level1, false, simpleRandomController, recordActionsFile, seed, 0);
+	        		for(double d:result) {
+	        			pw.print(d+",");
+	        		}
+	        		pw.println();
+	        		
+	        	}
 
-		if(true) {
+	            //ファイルに書き出す
+	            pw.close();
+	            fw.close();
+	        }
+	        files[0].getName();
+		}
+		
+		
+		RuleGenMachine.runOneGame(game, recordGameFile, level1, true, sampleOLETSController, recordActionsFile, seed, 0);
+/*
+		if(false) {
 			for(int i=0;i<100;i++){
 				gameIdx = i%gameIds.length;
 				game = generateRulePath + games[gameIds[gameIdx]] + ".txt";
@@ -130,7 +178,7 @@ public class TestRuleGeneration {
 				//RuleGenMachine.playOneGame(game, recordGameFile, level1, recordActionsFile, seed);
 			}
 		}
-
+*/
 
 
 
