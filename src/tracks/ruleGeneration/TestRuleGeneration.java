@@ -82,14 +82,17 @@ public class TestRuleGeneration {
 				gameIdx = i%gameIds.length;
 				game = generateRulePath + games[gameIds[gameIdx]] + ".txt";
 				level1 = gamesPath + games[gameIds[gameIdx]] + "_lvl" + levelIdx + ".txt";
-				
+
 				for(int j=0;j<Generators.length;j++) {
+					if(i==0 && j<1) {
+						break;
+					}
 					seed = seed+1;
-					
+
 
 					Generator = generatorPath + Generators[j] + generatorClass;
 
-					
+
 					recordGameFile = generateRulePath + games[gameIds[gameIdx]] + "_" + Generators[j] + "_" + seed + ".txt";
 
 					try {
@@ -102,7 +105,7 @@ public class TestRuleGeneration {
 			}
 		}
 		else {
-			boolean generate = true;
+			boolean generate = false;
 			if (generate) {
 				String record = recordGameFile+seed+"const.txt";
 				RuleGenMachine.generateRules(game, level1, constructiveRuleGenerator, record, seed);
