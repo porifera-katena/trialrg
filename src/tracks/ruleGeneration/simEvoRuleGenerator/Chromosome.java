@@ -39,7 +39,7 @@ public class Chromosome implements Comparable<Chromosome>{
 	 */
 	private int badFrames;
 
-	/*
+	/**
 	 * contains how many errors came out of the build test
 	 */
 	private int errorCount;

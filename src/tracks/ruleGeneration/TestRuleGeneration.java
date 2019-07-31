@@ -26,6 +26,7 @@ public class TestRuleGeneration {
 		String constructiveRuleGenerator = "tracks.ruleGeneration.constructiveRuleGenerator.RuleGenerator";
 		String geneticRuleGenerator = "tracks.ruleGeneration.geneticRuleGenerator.RuleGenerator";
 		String simEvoRuleGenerator = "tracks.ruleGeneration.simEvoRuleGenerator.RuleGenerator";
+		String cylindRuleGenerator = "tracks.ruleGeneration.cylinderP406.RuleGenerator";
 
 		// Available games:
 		String gamesPath = "examples/gridphysics/";
@@ -57,7 +58,7 @@ public class TestRuleGeneration {
 		boolean visuals = true;
 		Random random = new Random();
 		int seed = random.nextInt();
-		int gameIdx = 11;
+		int gameIdx = 90;
 		int levelIdx = 1;
 
 
@@ -77,11 +78,15 @@ public class TestRuleGeneration {
 		// 1. Generate rules (Interaction and Terminations) for a fixed level
 
 		String generatorPath = "tracks.ruleGeneration.";
-		String generatorClass = "RuleGenerator.RuleGenerator";
-		String Generators[] = {"genetic","simEvo","climb"};
+		String generatorClass = ".RuleGenerator";
+		String Generators[] = {"geneticRuleGenerator","simEvoRuleGenerator","climbRuleGenerator","cylinderP406"};
 		String Generator = "";
 		int gameIds[] = {0,11,76};
-		
+		String record = recordGameFile+seed+Generators[3]+".txt";
+		System.out.println(generatorPath + Generators[3] + generatorClass);
+		RuleGenMachine.generateRules(game, level1, /*generatorPath + Generators[3] + generatorClass*/constructiveRuleGenerator, record, seed);
+		RuleGenMachine.runOneGame(game,record , level1, true, sampleOLETSController, "action_rec.txt", seed, 0);
+		/*
 		for(int i=0;i<gameIds.length;i++) {
 			File file = new File("C:\\"+games[gameIds[i]]);
 	        File files[] = file.listFiles();
@@ -122,8 +127,8 @@ public class TestRuleGeneration {
 	        files[0].getName();
 		}
 		
-		
-		RuleGenMachine.runOneGame(game, recordGameFile, level1, true, sampleOLETSController, recordActionsFile, seed, 0);
+		*/
+		//RuleGenMachine.runOneGame(game, game, level1, true, sampleOLETSController, recordActionsFile, seed, 0);
 /*
 		if(false) {
 			for(int i=0;i<100;i++){
