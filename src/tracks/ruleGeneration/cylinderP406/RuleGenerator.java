@@ -430,9 +430,9 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		//c.calculateFitness(0);
 		//System.out.println(c.getFitness());
 
-		String[][] rules = r;//bestChromosome.getRuleset();
+		//String[][] rules = r;//bestChromosome.getRuleset();
 
-		return rules;
+		return bestChromosome.getRuleset();
 	}
 
 	
