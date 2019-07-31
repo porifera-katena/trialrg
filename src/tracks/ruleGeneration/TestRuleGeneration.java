@@ -184,10 +184,6 @@ public class TestRuleGeneration {
 			}
 		}
 */
-
-
-
-
 	}
 
 }
