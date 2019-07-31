@@ -58,7 +58,7 @@ public class TestRuleGeneration {
 		boolean visuals = true;
 		Random random = new Random();
 		int seed = random.nextInt();
-		int gameIdx = 90;
+		int gameIdx = 0;
 		int levelIdx = 1;
 
 
@@ -71,7 +71,7 @@ public class TestRuleGeneration {
 
 		// level names from 0 to 4 (game_lvlN.txt).
 
-		String game = generateRulePath + games[gameIdx] + ".txt";
+		String game = gamesPath + games[gameIdx] + ".txt";
 		String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx + ".txt";
 		String recordGameFile = generateRulePath + games[gameIdx] + "_ggame_";
 
