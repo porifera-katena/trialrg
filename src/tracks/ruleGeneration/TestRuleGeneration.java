@@ -31,7 +31,7 @@ public class TestRuleGeneration {
 		// Available games:
 		String gamesPath = "examples/gridphysics/";
 		String physicsGamesPath = "examples/contphysics/";
-		String generateRulePath = gamesPath;
+		String generateRulePath = "examples/generatedgame/";
 
 		// All public games (gridphysics)
 		String[] games = new String[]{"aliens", "angelsdemons", "assemblyline", "avoidgeorge", "bait", // 0-4
@@ -82,9 +82,13 @@ public class TestRuleGeneration {
 		String Generators[] = {"geneticRuleGenerator","simEvoRuleGenerator","climbRuleGenerator","cylinderP406"};
 		String Generator = "";
 		int gameIds[] = {0,11,76};
-		String record = recordGameFile+seed+Generators[3]+".txt";
-		System.out.println(generatorPath + Generators[3] + generatorClass);
-		RuleGenMachine.generateRules(game, level1, /*generatorPath + Generators[3] + generatorClass*/constructiveRuleGenerator, record, seed);
+		String record = "";
+		for(int i=0;i<5;i++) {
+			seed = random.nextInt();
+			record = recordGameFile+seed+Generators[3]+".txt";
+			System.out.println(generatorPath + Generators[3] + generatorClass);
+			RuleGenMachine.generateRules(game, level1, generatorPath + Generators[3] + generatorClass, record, seed);
+		}
 		RuleGenMachine.runOneGame(game,record , level1, true, sampleOLETSController, "action_rec.txt", seed, 0);
 		/*
 		for(int i=0;i<gameIds.length;i++) {

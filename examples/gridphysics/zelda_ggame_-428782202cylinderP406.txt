@@ -1,0 +1,41 @@
+BasicGame
+    SpriteSet
+        collectible >
+            key > Immovable  img=oryx/key2 color=ORANGE
+            monsterQuick > RandomNPC  img=oryx/bat1 cooldown=2 cons=6
+            monsterNormal > RandomNPC  img=oryx/spider2 cooldown=4 cons=8
+            monsterSlow > RandomNPC  img=oryx/scorpion1 cooldown=8 cons=12
+        sword > OrientedFlicker  singleton=True img=oryx/slash1 limit=5
+        goal > Door  img=oryx/doorclosed1 color=GREEN
+        floor > Immovable  img=oryx/floor3 hidden=True randomtiling=0.9
+        nokey > ShootAvatar  frameRate=8 img=oryx/swordman1 stype=sword
+        withkey > ShootAvatar  frameRate=8 img=oryx/swordmankey1 color=ORANGE stype=sword
+        wall > Immovable  img=oryx/wall3 autotiling=true
+    LevelMapping
+        g > floor goal
+        + > floor key
+        A > floor nokey
+        1 > floor monsterQuick
+        2 > floor monsterNormal
+        3 > floor monsterSlow
+        w > wall
+        . > floor
+    InteractionSet
+        key nokey > killSprite scoreChange=1
+        key withkey > killSprite scoreChange=1
+        monsterQuick nokey > killSprite scoreChange=1
+        monsterQuick withkey > killSprite scoreChange=1
+        monsterNormal nokey > killSprite scoreChange=1
+        monsterNormal withkey > killSprite scoreChange=1
+        monsterSlow nokey > killSprite scoreChange=1
+        monsterSlow withkey > killSprite scoreChange=1
+        goal nokey > killSprite
+        goal withkey > killSprite
+        nokey wall > stepBack
+        withkey wall > stepBack
+        sword wall > wrapAround
+        monsterQuick wall > stepBack
+        monsterNormal wall > stepBack
+        monsterSlow wall > stepBack
+    TerminationSet
+        SpriteCounter stype=goal limit=0 win=True

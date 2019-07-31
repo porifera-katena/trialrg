@@ -14,27 +14,21 @@ import core.player.AbstractPlayer;
 import tools.ElapsedCpuTimer;
 import tools.LevelAnalyzer;
 
+/*
+ * cylinderP406
+ * 2019/07/31
+ * */
+
 public class RuleGenerator extends AbstractRuleGenerator{
 	public static final String BEST_AGENT_NAME = "tracks.singlePlayer.advanced.olets.Agent";
-	/**
-	 * The name of a naive agent
-	 */
 	public static final String NAIVE_AGENT_NAME = "tracks.singlePlayer.advanced.sampleMCTS.Agent";
-	/**
-	 * The name of the random agent
-	 */
 	public static final String RANDOM_AGENT_NAME = "tracks.singlePlayer.simple.simpleRandom.Agent";
-	/**
-	 * The name of the do nothing agent
-	 */
 	public static final String DO_NOTHING_AGENT_NAME = "tracks.singlePlayer.simple.doNothing.Agent";
 	
 	public static long EVALUATION_TIME = 10000;
 	public static double PICK_PROB = 0.7;
 	
 	private double worstTime;
-
-	
 	private int CheckNum=0;
 	
 	private tracks.ruleGeneration.constructiveRuleGenerator.RuleGenerator constGen;
@@ -68,16 +62,13 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			"increaseSpeedToAll stype=<@stype@> value=<@value@>", "decreaseSpeedToAll stype=<@stype@> value=<@value@>", "attractGaze", "align", "turnAround", "wrapAround",
 			"pullWithIt", "bounceForward",/* "teleportToExit",*/ "collectResource", "setSpeedForAll stype=<@stype@> value=<@value@>",// "undoAll",
 			"reverseDirection", "changeResource resource=<@resource@> value=<@value@>" };
-	private String[] killingInteractions = new String[] { 
+	/*private String[] killingInteractions = new String[] { 
 			"killSprite", "killAll stype=<@stype@>", "killIfHasMore resource=<@resource@> limit=<@limit@>", "killIfHasLess resource=<@resource@> limit=<@limit@>",
-			"killIfFromAbove", "killIfOtherHasMore resource=<@resource@> limit=<@limit@>"};
+			"killIfFromAbove", "killIfOtherHasMore resource=<@resource@> limit=<@limit@>"};*/
 	
 	private ArrayList<Interaction> terminations;
 	private ArrayList<Interaction> interactions;
 	
-	/**
-	 * initialize the agents used during evaluating the chromosome
-	 */
 	private void constructAgent(SLDescription sl){
 		try{
 			Class agentClass = Class.forName(BEST_AGENT_NAME);
@@ -244,21 +235,22 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		
 		String[][] r = {toStringArray(interactions),toStringArray(terminations)};
 		
-		/*if(LoopFlag==false) {
-			return r;
-		}*/
 		int numberOfIterations = 0;
 		Chromosome bestChromosome = new Chromosome(r,sl);
 		ArrayList<Chromosome> newChromosomes = new ArrayList<Chromosome>();
 		Logger.getInstance().active = false;
-		worstTime = 4 * EVALUATION_TIME * interactions.size();
+		worstTime = 4 * EVALUATION_TIME/* * interactions.size()*/;
 		
 		evolution: while(true) {
-			System.out.println("Generation #" + (numberOfIterations + 1) + ": ");
+			numberOfIterations++;
+			System.out.println("Generation #" + numberOfIterations + ": ");
 			newChromosomes.clear();
+			String[][] curreentRule = {toStringArray(interactions),toStringArray(terminations)};
+			Chromosome currentChromosome = new Chromosome(curreentRule,sl);
+			currentChromosome.calculateFitnessLight(EVALUATION_TIME);
+			
 			for (int i = 0; i < interactions.size(); i++) {
 				//ArrayList<Interaction> copy = (ArrayList<Interaction>) interactions.clone();
-				//copy.remove(i);
 				//temp.add(avatar.get(0).name+" EOS > stepBack");
 				String[][] rule = {toStringArray(interactions,i),toStringArray(terminations)};
 				Chromosome c = new Chromosome(rule,sl,i);
@@ -292,7 +284,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 						break evolution;
 					}
 				}
-				if(target.compareTo(c)>0) {
+				if(currentChromosome.compareTo(c)>0) {
 					interactions = copy;
 					if(bestChromosome.compareTo(c)>0) {
 						bestChromosome = c;
@@ -340,7 +332,6 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		int i1 = random.nextInt(spritePowerSet.size());
 		int i2 = (i1 + 1 + random.nextInt(spritePowerSet.size() - 1)) % spritePowerSet.size();
 		do {
-			// add score change parameter for interactions
 			String scoreChange = "";
 			if(random.nextBoolean()){
 				scoreChange += "scoreChange=" + (random.nextInt(5) - 2)+" ";
@@ -369,9 +360,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				}
 			}
 		}while(newInteraction.contains("<@"));
-		// add the new random interaction that doesn't produce errors
 		return new Interaction(spritePowerSet.get(i1),spritePowerSet.get(i2),newInteraction);
-		//System.out.println(interaction);
 	}
 
 	
