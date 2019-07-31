@@ -5,16 +5,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
-import javax.print.attribute.Size2DSyntax;
-
 import core.game.GameDescription.SpriteData;
 import core.game.SLDescription;
 import core.game.StateObservation;
 import core.generator.AbstractRuleGenerator;
 import core.logging.Logger;
 import core.player.AbstractPlayer;
-import core.termination.Termination;
-import ontology.Types;
 import tools.ElapsedCpuTimer;
 import tools.LevelAnalyzer;
 
@@ -37,9 +33,8 @@ public class RuleGenerator extends AbstractRuleGenerator{
 	public static double PICK_PROB = 0.7;
 	
 	private double worstTime;
-	//private double avgTime;
-	//private double avgcalcFitTime;
-	//private double totalTime;
+
+	
 	private int CheckNum=0;
 	
 	private tracks.ruleGeneration.constructiveRuleGenerator.RuleGenerator constGen;
@@ -59,7 +54,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 	
 	private static Random random;
 	
-	private String target = null;
+	//private String target = null;
 	
 	public static LevelAnalyzer la;
 	
@@ -150,6 +145,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				}
 			}
 		}
+		String target = usefulSprites.get(random.nextInt(usefulSprites.size()-1));
 		
 		boolean flag = true;
 		while(flag) {
@@ -213,6 +209,14 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			interactions.add(I);
 		}
 		for (String r:initialRule[1]) {
+			for(String p:r.split(" ",0)) {
+				if(p.matches(".*stype=.*")) {
+					p = p.replace("stype=", "");
+					if(!usefulSprites.contains(p)) {
+						r=r.replace(p, target);
+					}
+				}
+			}
 			Interaction I = new Interaction(r);
 			terminations.add(I);
 		}
@@ -297,140 +301,6 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				System.out.print("*");
 			}
 		}
-		
-		/*avgTime = worstTime;
-		avgcalcFitTime = 4 * EVALUATION_TIME;
-		totalTime = 0;*/
-		int calculateFitNum = 0;
-		
-		int numberOfGoodGens = 0;
-		int mutatedInteractions[] = {-1,-1};
-/*
-		// START EVO LOOP
-		ArrayList<Chromosome> chromosomes = new ArrayList<Chromosome>();
-		//ArrayList<Chromosome> newChromosomes = new ArrayList<Chromosome>();
-		Logger.getInstance().active = false;
-		while(time.remainingTimeMillis() > 4 * avgTime && time.remainingTimeMillis() > worstTime && (time.remainingTimeMillis() > InteractionNum * avgcalcFitTime * 2 || calculateFitNum == 0)){
-			int remainingcalcFitTime = (int) ( (time.remainingTimeMillis() / avgcalcFitTime) - InteractionNum*2);
-			ElapsedCpuTimer timer = new ElapsedCpuTimer();
-			System.out.println("Generation #" + (numberOfIterations + 1) + "(" + numberOfGoodGens + ")" + ": ");
-			chromosomes.clear();
-			for (int i = 0; i < InteractionNum; i++) {
-				//if(mutatedInteractions[0]!=i && mutatedInteractions[1]!=i) {
-					ArrayList<String> temp = new ArrayList<String>();
-					temp = (ArrayList<String>) interactions.clone();
-					temp.remove(i);
-					temp.add(avatar.get(0).name+" EOS > stepBack");
-					String[][] rules = {toStringArray(temp),toStringArray(terminations)};
-					Chromosome c = new Chromosome(rules,sl,i);
-					if(c.calculateFitnessLight(SharedData.EVALUATION_TIME)) {
-						calculateFitNum++;
-					}
-					chromosomes.add(c);
-					if(bestChromosome.compareTo(c)<0) {
-						bestChromosome = c;
-					}
-					System.out.print("*");
-				//}
-			}
-			System.out.println();*/
-			/*for (Chromosome c : newChromosomes) {
-				chromosomes.add(c);
-			}*/
-		/*
-
-			Collections.shuffle(chromosomes);
-			Collections.sort(chromosomes);
-			for(int i=0;i<2;i++) {
-				mutatedInteractions[i] = chromosomes.get(i).id;
-			}
-
-			for(Chromosome c:chromosomes) {
-				System.out.print("[");
-				for(Double f:c.getFitness()) {
-					System.out.print(f+",");
-				}
-				System.out.print("]");
-			}
-			System.out.println();*/
-			/******************************/
-			//newChromosomes.clear();
-			/*for (int i = 0; i < 1; i++) {
-				Chromosome c = null;
-				//Chromosome worst = chromosomes.get(InteractionNum-1);
-				Chromosome worst = chromosomes.get(0);
-				for(int j=0;j<remainingcalcFitTime;j++) {
-					int id = chromosomes.get(0).id;
-					for(int k=0;k<chromosomes.size();k++) {
-						if(SharedData.random.nextInt(10)>1) {
-							id = chromosomes.get(k).id;
-							break;
-						}
-					}
-					
-					//System.out.print(i);
-					ArrayList<String> temp = new ArrayList<String>();
-					temp = (ArrayList<String>) interactions.clone();
-					temp.set(id, createInteraction(usefulSprites,id));
-					sl.testRules(toStringArray(temp),toStringArray(terminations));
-					while(sl.getErrors().size() > 0){
-						temp.set(id, createInteraction(usefulSprites,id));
-						sl.testRules(toStringArray(temp),toStringArray(terminations));
-					}
-					
-					//temp.remove(mutatedInteractions[(i+1)%2]);
-					temp.add(avatar.get(0).name+" EOS > stepBack");
-					String[][] rules = {toStringArray(temp),toStringArray(terminations)};
-					c = new Chromosome(rules,sl,-1);
-					if(c.calculateFitnessLight(SharedData.EVALUATION_TIME)) {
-						calculateFitNum++;
-					}
-					if(bestChromosome.compareTo(c)<0) {
-						bestChromosome = c;
-					}
-					System.out.print("c="+worst.compareTo(c)+" ");
-					if (worst.compareTo(c)>0) {
-						remainingcalcFitTime = remainingcalcFitTime - (j+1);
-						interactions = temp;
-						interactions.remove(interactions.size()-1);
-						break;
-					}
-					System.out.print("{");
-					for(Double f:c.getFitness()) {
-						System.out.print(f+",");
-					}
-					System.out.print("}");
-				}
-				//newChromosomes.add(c);
-
-			}*/
-			/***********************/
-			/*numberOfIterations += 1;
-			if(calculateFitNum != 0) {
-				numberOfGoodGens++;
-				totalTime += timer.elapsedMillis();
-				avgTime = totalTime / numberOfGoodGens;
-				avgcalcFitTime = totalTime/calculateFitNum;
-			}
-			
-		}
-
-		for (int i = 0; i < 1; i++) {
-			interactions.set(chromosomes.get(i).id, "");
-		}
-		/*
-		for(String s:interactions) {
-			System.out.println(s);
-		}
-		for(String s:terminations) {
-			System.out.println(s);
-		}
-		String[][] rules = {toStringArray(interactions),toStringArray(terminations)};*/
-		//Chromosome c = new Chromosome(rules,sl,0);
-		//c.calculateFitness(0);
-		//System.out.println(c.getFitness());
-
-		//String[][] rules = r;//bestChromosome.getRuleset();
 
 		return bestChromosome.getRuleset();
 	}
@@ -463,14 +333,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		return (remainingTime<avgTime || remainingTime<worstTime);
 	}
 	
-	/*private String createInteraction(ArrayList<String> usefulSprites,int i) {
-		if (i==0) {
-			return createGoalInteraction(usefulSprites, target);
-		}
-		else {
-			return createInteraction(usefulSprites);
-		}
-	}*/
+
 
 	private Interaction createInteraction() {
 		String newInteraction = "";
@@ -510,46 +373,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		return new Interaction(spritePowerSet.get(i1),spritePowerSet.get(i2),newInteraction);
 		//System.out.println(interaction);
 	}
-/*
-	private String createGoalInteraction(ArrayList<String> usefulSprites,String target) {
-		String interaction = "";
-		do {
-			interaction = (target + " " + usefulSprites.get(SharedData.random.nextInt(usefulSprites.size())) + " > " +
-					this.availableKillingInteractions[SharedData.random.nextInt(this.availableKillingInteractions.length)]);
-			while (interaction.contains("<@stype@>")) {
-				interaction = interaction.replaceFirst("<@stype@>", target);
-			}
-			if (resource.size()>0) {
-				while (interaction.contains("<@resource@>")) {
-					interaction = interaction.replaceFirst("<@resource@>", resource.get(SharedData.random.nextInt(resource.size())).name);
-				}
-			}
-			while (interaction.contains("<@limit@>")) {
-				interaction = interaction.replaceFirst("<@limit@>", ""+SharedData.random.nextInt(10));
-			}
-			while (interaction.contains("<@value@>")) {
-				interaction = interaction.replaceFirst("<@value@>", ""+SharedData.random.nextInt(10));
-			}
-			while (interaction.contains("<@bool@>")) {
-				if (SharedData.random.nextBoolean()) {
-					interaction = interaction.replaceFirst("<@bool@>", "true");
-				}
-				else {
-					interaction = interaction.replaceFirst("<@bool@>", "false");
-				}
-			}
-		}while(interaction.contains("<@"));
-		// add the new random interaction that doesn't produce errors
-		interaction = interaction + " scoreChange=10";
-		System.out.println(interaction);
-		return interaction;	
-	}*/
-/*
-	private String[] toStringArray(ArrayList<String> arlist) {
-		String[] str = new String[arlist.size()];
-		arlist.toArray(str);
-		return str;
-	}*/
+
 	
 	private String[] toStringArray(ArrayList<Interaction> Ilist) {
 		ArrayList<String> arlist = new ArrayList<String>();
