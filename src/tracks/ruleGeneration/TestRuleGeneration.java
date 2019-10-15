@@ -54,11 +54,11 @@ public class TestRuleGeneration {
 				"waves", "whackamole", "wildgunman", "witnessprotection", "wrapsokoban", // 85-89
 				"zelda", "zenpuzzle"}; // 90, 91
 
-		// Other settings
+		// Other settings 77
 		boolean visuals = true;
 		Random random = new Random();
 		int seed = random.nextInt();
-		int gameIdx = 0;
+		int gameIdx = 11;
 		int levelIdx = 1;
 
 
@@ -83,55 +83,39 @@ public class TestRuleGeneration {
 		String Generator = "";
 		int gameIds[] = {0,11,76};
 		String record = "";
-		for(int i=0;i<5;i++) {
+		/*while(true) {
+			//RuleGenMachine.playOneGame(game, game, level1, recordActionsFile, seed);
+			RuleGenMachine.playOneGame(game, "/Users/tomoya/eclipse-workspace/rulegen/examples/generatedgame/sim/boulderdash_ggame_215451621.txt", level1, recordActionsFile, seed);
+		}*/
+		/*
+		 * /Users/tomoya/eclipse-workspace/rulegen/examples/generatedgame/sim/boulderdash_ggame_215451621.txt
+		 * /Users/tomoya/eclipse-workspace/rulegen/examples/generatedgame/sim/boulderdash_ggame_-1156089430.txt
+		 * /Users/tomoya/eclipse-workspace/rulegen/examples/generatedgame/sim/boulderdash_ggame_-1156089432.txt
+		 * */
+		// RuleGenMachine.runOneGame(game,game , level1, true,sampleOLETSController , null, seed, 0);
+		/*for(int i=0;i<100;i++) {
 			seed = random.nextInt();
 			record = recordGameFile+seed+Generators[3]+".txt";
 			System.out.println(generatorPath + Generators[3] + generatorClass);
 			RuleGenMachine.generateRules(game, level1, generatorPath + Generators[3] + generatorClass, record, seed);
 		}
 		RuleGenMachine.runOneGame(game,record , level1, true, sampleOLETSController, "action_rec.txt", seed, 0);
-		/*
-		for(int i=0;i<gameIds.length;i++) {
-			File file = new File("C:\\"+games[gameIds[i]]);
+		*/
+		//for(int i=0;i<gameIds.length;i++) {
+			File file = new File("examples/climb");
 	        File files[] = file.listFiles();
 	        for(File f:files) {
 	        	String filename = f.getName();
-	        	int genId = -1;
-	        	for(int j=0;j<Generators.length;j++) {
-	        		if(filename.contains(Generators[j])) {
-	        			genId = j;
-	        		}
-	        	}
+				RuleGenMachine.runOneGame(game, f.getAbsolutePath(), level1, true, sampleOLETSController, recordActionsFile, seed,0);
 	        	
-	        	game = generateRulePath + games[gameIds[i]] + ".txt";
-				level1 = gamesPath + games[gameIds[i]] + "_lvl" + levelIdx + ".txt";
-				recordActionsFile = "actions_" + games[gameIds[i]] + "_lvl" + levelIdx + "_" + random.nextInt() + ".txt";
-				FileWriter fw = new FileWriter("C:\\"+games[gameIds[i]]+"\result"+games[gameIds[i]]+".txt", true);
-				PrintWriter pw = new PrintWriter(new BufferedWriter(fw));
-				
-	        	for(int j=0;j<10;j++) {
-	        		seed = random.nextInt();
-	        		double[] result = RuleGenMachine.runOneGame(game, f.getAbsolutePath(), level1, false, sampleOLETSController, recordActionsFile, seed, 0);
-	        		for(double d:result) {
-	        			pw.print(d+",");
-	        		}
-	        		pw.print(":");
-	        		result = RuleGenMachine.runOneGame(game, f.getAbsolutePath(), level1, false, simpleRandomController, recordActionsFile, seed, 0);
-	        		for(double d:result) {
-	        			pw.print(d+",");
-	        		}
-	        		pw.println();
-	        		
-	        	}
+				level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx + ".txt";
+				recordActionsFile = null;//"actions_" + games[gameIds[i]] + "_lvl" + levelIdx + "_" + random.nextInt() + ".txt";
 
-	            //ファイルに書き出す
-	            pw.close();
-	            fw.close();
 	        }
 	        files[0].getName();
-		}
+		//}
 		
-		*/
+		
 		//RuleGenMachine.runOneGame(game, game, level1, true, sampleOLETSController, recordActionsFile, seed, 0);
 /*
 		if(false) {
