@@ -1293,6 +1293,8 @@ public void calculateFitness2(long time) {
 			timer.setMaxTimeMillis(SharedData.EVALUATION_STEP_TIME);
 			Types.ACTIONS bestAction = agent.act(stateObs, timer);
 			stateObs.advance(bestAction);
+			System.out.println(stateObs.getMovablePositions());
+			//checkColl
 			k += checkIfOffScreen(stateObs);
 
 		}

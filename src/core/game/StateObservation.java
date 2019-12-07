@@ -30,7 +30,8 @@ public class StateObservation {
      * This is the model of the game, used to apply an action and
      * get to the next state. This model MUST NOT be public.
      */
-    protected ForwardModel model;
+    /**changed*/
+    public ForwardModel model;
 
     /**
      * Constructor for StateObservation. Requires a forward model

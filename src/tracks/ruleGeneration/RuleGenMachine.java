@@ -187,7 +187,7 @@ public class RuleGenMachine
 		// First, we create the game to be played..
 		Game toPlay = new VGDLParser().parseGame(gameFile);
 		String[] lines = new IO().readFile(levelFile);
-
+		CompetitionParameters.randomSeed = randomSeed;
 		try {
 			SLDescription sl = new SLDescription(toPlay, lines, randomSeed);
 			AbstractRuleGenerator generator = createRuleGenerator(ruleGenerator, sl);

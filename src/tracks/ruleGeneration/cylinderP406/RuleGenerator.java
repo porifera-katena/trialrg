@@ -1,16 +1,25 @@
 package tracks.ruleGeneration.cylinderP406;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import core.game.GameDescription.SpriteData;
+import core.competition.CompetitionParameters;
 import core.game.SLDescription;
 import core.game.StateObservation;
 import core.generator.AbstractRuleGenerator;
 import core.logging.Logger;
 import core.player.AbstractPlayer;
+import core.vgdl.VGDLRegistry;
 import tools.ElapsedCpuTimer;
 import tools.LevelAnalyzer;
 
@@ -45,6 +54,9 @@ public class RuleGenerator extends AbstractRuleGenerator{
 	private ArrayList<String> borderSprites;
 	
 	private ArrayList<ArrayList<String>> spritePowerSet;
+	
+	public HashMap<Integer,String> itypeToName;
+	public ArrayList<String> collidedPairs;
 	
 	private static Random random;
 	
@@ -112,7 +124,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 	 * @param time	amount of time allowed to generate
 	 */
 	public RuleGenerator(SLDescription sl, ElapsedCpuTimer time) {
-		
+		collidedPairs = new ArrayList<String>();
 		random = new Random();
 		la = new LevelAnalyzer(sl);
 		
@@ -121,6 +133,12 @@ public class RuleGenerator extends AbstractRuleGenerator{
 
 		String[][] currentLevel = sl.getCurrentLevel();
 		SpriteData[] extraSprites = sl.getGameSprites();
+		
+		itypeToName = new HashMap<Integer,String>();
+		for(SpriteData sData :sl.getGameSprites()) {
+			itypeToName.put(VGDLRegistry.GetInstance().getRegisteredSpriteValue(sl.decodeName(sData.name,CompetitionParameters.randomSeed)), sData.name);
+		}
+		
 		
 		// Just get the useful sprites from the current level
 		for (int y = 0; y < currentLevel.length; y++) {
@@ -230,8 +248,16 @@ public class RuleGenerator extends AbstractRuleGenerator{
 	 */
 	@Override
 	public String[][] generateRules(SLDescription sl, ElapsedCpuTimer time) {
-		
-		
+		FileWriter filewriter = null;
+
+		File file = new File(CompetitionParameters.randomSeed+"log.txt");
+		try {
+			filewriter = new FileWriter(file);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
 		
 		String[][] r = {toStringArray(interactions),toStringArray(terminations)};
 		
@@ -247,7 +273,26 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			newChromosomes.clear();
 			String[][] curreentRule = {toStringArray(interactions),toStringArray(terminations)};
 			Chromosome currentChromosome = new Chromosome(curreentRule,sl);
+			currentChromosome.setLogging(true);
 			currentChromosome.calculateFitnessLight(EVALUATION_TIME);
+			try {
+				filewriter.write(time.elapsedMillis()+","+currentChromosome.getFitness().get(0).toString()+","+currentChromosome.getFitness().get(1).toString()+","+currentChromosome.getFitness().get(2).toString());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			List<Entry<String, Integer>> list_entries = new ArrayList<Entry<String, Integer>>(currentChromosome.Log.entrySet());
+			Collections.sort(list_entries, new Comparator<Entry<String, Integer>>() {
+				public int compare(Entry<String, Integer> obj1, Entry<String, Integer> obj2) {
+					return obj1.getValue().compareTo(obj2.getValue());
+				}
+			});
+			collidedPairs.clear();
+			for(Entry<String, Integer> entry : list_entries) {
+				collidedPairs.add(entry.getKey());
+			}
+			
 			
 			for (int i = 0; i < interactions.size(); i++) {
 				//ArrayList<Interaction> copy = (ArrayList<Interaction>) interactions.clone();
@@ -293,7 +338,12 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				System.out.print("*");
 			}
 		}
-
+		try {
+			filewriter.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return bestChromosome.getRuleset();
 	}
 
@@ -325,9 +375,63 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		return (remainingTime<avgTime || remainingTime<worstTime);
 	}
 	
-
-
 	private Interaction createInteraction() {
+		String newInteraction = "";
+		if(collidedPairs.size()==0) {
+			return OLD_createInteraction();
+		}
+		String pair = collidedPairs.get(0);
+		for(String p :collidedPairs) {
+			if(random.nextDouble()<0.6) {
+				pair = p;
+			}
+		}
+		
+		int i1 = Integer.parseInt(pair.split(",")[0]);
+		int i2 = Integer.parseInt(pair.split(",")[1]);
+		if(random.nextBoolean()) {
+			int tmp = i1;
+			i1 = i2;
+			i2 = tmp;
+		}
+		ArrayList<String> first = new ArrayList<String>();
+		ArrayList<String> second = new ArrayList<String>();
+		first.add(itypeToName.get(i1));
+		second.add(itypeToName.get(i2));
+
+		do {
+			String scoreChange = "";
+			if(random.nextBoolean()){
+				scoreChange += "scoreChange=" + (random.nextInt(5) - 2)+" ";
+			}
+			newInteraction = (this.availableInteractions[random.nextInt(this.availableInteractions.length)] + " " + scoreChange);
+			while (newInteraction.contains("<@stype@>")) {
+				newInteraction = newInteraction.replaceFirst("<@stype@>", usefulSprites.get(random.nextInt(usefulSprites.size()-1)));
+			}
+			if (resourceSprites.size()>0) {
+				while (newInteraction.contains("<@resource@>")) {
+					newInteraction = newInteraction.replaceFirst("<@resource@>", resourceSprites.get(random.nextInt(resourceSprites.size())));
+				}
+			}
+			while (newInteraction.contains("<@limit@>")) {
+				newInteraction = newInteraction.replaceFirst("<@limit@>", ""+random.nextInt(10));
+			}
+			while (newInteraction.contains("<@value@>")) {
+				newInteraction = newInteraction.replaceFirst("<@value@>", ""+random.nextInt(10));
+			}
+			while (newInteraction.contains("<@bool@>")) {
+				if (random.nextBoolean()) {
+					newInteraction = newInteraction.replaceFirst("<@bool@>", "true");
+				}
+				else {
+					newInteraction = newInteraction.replaceFirst("<@bool@>", "false");
+				}
+			}
+		}while(newInteraction.contains("<@"));
+		return new Interaction(spritePowerSet.get(i1),spritePowerSet.get(i2),newInteraction);
+	}
+
+	private Interaction OLD_createInteraction() {
 		String newInteraction = "";
 		int i1 = random.nextInt(spritePowerSet.size());
 		int i2 = (i1 + 1 + random.nextInt(spritePowerSet.size() - 1)) % spritePowerSet.size();

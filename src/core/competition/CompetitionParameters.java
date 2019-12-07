@@ -48,7 +48,7 @@ public class CompetitionParameters
     /**
      * Milliseconds allowed for the rule generator to generate rules
      */
-    public static final int RULE_ACTION_TIME = 1800000*10;
+    public static final int RULE_ACTION_TIME = 3600000*5;//=1800000*10;
     
     /**
      * Milliseconds allowed for the rule generator disqualification, if it returns rules after this time.
@@ -157,5 +157,7 @@ public class CompetitionParameters
     public static double MAX_WINDOW_SIZE = 800.0;
     public static int LEARNING_BLOCK_SIZE = 10;
     public static boolean IS_LEARNING = false;
+    /*changed*/
+	public static int randomSeed;
     public static final int validation_times = 10;
 }

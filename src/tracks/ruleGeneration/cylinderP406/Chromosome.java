@@ -3,20 +3,27 @@ import java.util.*;
 
 import core.game.SLDescription;
 import core.game.StateObservation;
-
+import core.competition.CompetitionParameters;
 import core.game.Observation;
 import core.player.AbstractPlayer;
+import core.vgdl.SpriteGroup;
+import core.vgdl.VGDLRegistry;
+import core.vgdl.VGDLSprite;
 import ontology.Types;
 import ontology.Types.WINNER;
 import tools.ElapsedCpuTimer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.LoggingMXBean;
 
 
 public class Chromosome implements Comparable<Chromosome>{
 
 	public int id = 0;
+	
+	public boolean Logging = false;
+	public HashMap<String, Integer> Log;
 
 	private ArrayList<Double> fitness;
 
@@ -301,6 +308,33 @@ public class Chromosome implements Comparable<Chromosome>{
 			timer.setMaxTimeMillis(EVALUATION_STEP_TIME);
 			Types.ACTIONS bestAction = agent.act(stateObs, timer);
 			stateObs.advance(bestAction);
+			if(Logging==true) {
+				ArrayList<Observation>[][] grid = stateObs.getObservationGrid();
+				for(ArrayList<Observation>[] gs: grid) {
+					for(ArrayList<Observation> obs :gs) {
+						for(int j=0;j<obs.size();j++) {
+							for(int j2=j+1;j2<obs.size();j2++) {
+								
+								Integer a = obs.get(j).itype;
+								Integer b = obs.get(j2).itype;
+								if(a<b) {
+									a = b;
+									b = obs.get(j).itype;
+								}
+								String key = a.toString()+b.toString();
+								if(Log.get(key)!=null) {
+									Log.put(key, Log.get(key)+1);
+								}
+								else {
+									Log.put(key,1);
+								}
+								
+								
+							}
+						}
+					}
+				}
+			}
 			k += checkIfOffScreen(stateObs);
 
 		}
@@ -310,6 +344,7 @@ public class Chromosome implements Comparable<Chromosome>{
 		}
 		return i;
 	}
+	
 	private StateObservation MakeNewGame() {
 		return sl.testRules(ruleset[0], ruleset[1], spriteSetStruct);
 	}
@@ -430,4 +465,12 @@ public class Chromosome implements Comparable<Chromosome>{
 	public void setRuleset(String[][] nRuleset) {
 		this.ruleset = nRuleset;
 	}
+	
+	public void setLogging(boolean tf) {
+		this.Logging = tf;
+		if(tf) {
+			Log = new HashMap<String,Integer>();
+		}
+	}
+	
 }

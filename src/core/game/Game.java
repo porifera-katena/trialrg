@@ -69,7 +69,8 @@ public abstract class Game {
 	 * Groups of sprites in the level. Each element of the array is a collection
 	 * of sprites of a given type, which is also the index of the array.
 	 */
-	protected SpriteGroup[] spriteGroups;
+	/*changed*/
+	public SpriteGroup[] spriteGroups;
 
 	/**
 	 * Relationships for collisions: double array of (list of) effects.
@@ -1723,6 +1724,10 @@ public abstract class Game {
 	 *            where the sprite has to be placed.
 	 */
 	public VGDLSprite addSprite(int itype, Vector2d position) {
+		return this.addSprite((SpriteContent) classConst[itype], position, itype, false);
+	}
+	
+	public VGDLSprite addSprite(int itype, Vector2d position,String key) {
 		return this.addSprite((SpriteContent) classConst[itype], position, itype, false);
 	}
 

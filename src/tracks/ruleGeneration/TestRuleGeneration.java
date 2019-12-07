@@ -82,7 +82,15 @@ public class TestRuleGeneration {
 		String Generators[] = {"geneticRuleGenerator","simEvoRuleGenerator","climbRuleGenerator","cylinderP406"};
 		String Generator = "";
 		int gameIds[] = {0,11,76};
-		String record = "";
+		String record = "collChecksimevo"+seed+".txt";
+		RuleGenMachine.generateRules(game, level1, generatorPath + Generators[3] + generatorClass, record, seed);
+		seed = random.nextInt();
+		RuleGenMachine.generateRules(game, level1, generatorPath + Generators[3] + generatorClass, "collChecksimevo"+seed+".txt", seed);
+		/*for(int i=0;i<10;i++) {
+			RuleGenMachine.runOneGame(game, generateRulePath+"aliens_mutated.txt", level1, true, sampleOLETSController, recordActionsFile, seed,0);
+		}
+		RuleGenMachine.playOneGame(game, generateRulePath+"aliens_mutated.txt", level1, recordActionsFile, seed);
+*/
 		/*while(true) {
 			//RuleGenMachine.playOneGame(game, game, level1, recordActionsFile, seed);
 			RuleGenMachine.playOneGame(game, "/Users/tomoya/eclipse-workspace/rulegen/examples/generatedgame/sim/boulderdash_ggame_215451621.txt", level1, recordActionsFile, seed);
@@ -102,7 +110,7 @@ public class TestRuleGeneration {
 		RuleGenMachine.runOneGame(game,record , level1, true, sampleOLETSController, "action_rec.txt", seed, 0);
 		*/
 		//for(int i=0;i<gameIds.length;i++) {
-			File file = new File("examples/climb");
+			/*File file = new File("examples/climb");
 	        File files[] = file.listFiles();
 	        for(File f:files) {
 	        	String filename = f.getName();
@@ -112,7 +120,7 @@ public class TestRuleGeneration {
 				recordActionsFile = null;//"actions_" + games[gameIds[i]] + "_lvl" + levelIdx + "_" + random.nextInt() + ".txt";
 
 	        }
-	        files[0].getName();
+	        files[0].getName();*/
 		//}
 		
 		
