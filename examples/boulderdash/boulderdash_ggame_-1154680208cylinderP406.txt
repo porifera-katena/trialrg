@@ -1,0 +1,43 @@
+BasicGame
+    SpriteSet
+        sword > Flicker  singleton=True img=oryx/pickaxe color=LIGHTGRAY limit=1
+        diamond > Resource  img=oryx/diamond3 shrinkfactor=0.75 color=YELLOW limit=10
+        boulder > Missile  orientation=DOWN img=oryx/mineral1 color=GRAY speed=0.2
+        background > Immovable  img=oryx/backBlack hidden=True
+        butterfly > RandomNPC  img=oryx/bat2 color=PINK cons=1
+        dirt > Immovable  img=oryx/backLBrown color=BROWN
+        avatar > ShootAvatar  frameRate=8 img=oryx/spelunky stype=sword
+        wall > Immovable  img=oryx/dirtWall autotiling=true
+        exitdoor > Door  img=oryx/door2 color=GREEN
+        crab > RandomNPC  img=oryx/scorpion2 color=RED cons=1
+    LevelMapping
+        . > background dirt
+        - > background
+        e > background exitdoor
+        o > background boulder
+        x > background diamond
+        c > background crab
+        b > background butterfly
+        A > background avatar
+    InteractionSet
+        diamond boulder < pullWithIt
+        avatar crab > killSprite
+        crab butterfly < removeScore  stype=boulder scoreChange=0
+        crab boulder < setSpeedForAll stype=dirt value=9
+        background diamond < removeScore  stype=crab scoreChange=1
+        avatar EOS > stepBack
+        sword EOS > stepBack
+        boulder EOS > stepBack
+        crab EOS > turnAround
+        butterfly EOS > turnAround
+        crab sword > killSprite scoreChange=1
+        sword crab > killSprite
+        crab dirt < wrapAround scoreChange=-2
+        butterfly dirt < wrapAround scoreChange=-2
+        sword butterfly > killSprite
+        butterfly wall < killIfHasLess resource=diamond limit=7 scoreChange=-2
+        crab wall background dirt < killIfHasMore resource=diamond limit=3 scoreChange=-1
+        butterfly wall background dirt < killIfHasMore resource=diamond limit=3 scoreChange=-1
+    TerminationSet
+        SpriteCounter stype=exitdoor limit=0 win=True
+        SpriteCounter stype=avatar limit=0 win=False

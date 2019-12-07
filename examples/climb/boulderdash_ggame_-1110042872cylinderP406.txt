@@ -1,0 +1,43 @@
+BasicGame
+    SpriteSet
+        sword > Flicker  singleton=True img=oryx/pickaxe color=LIGHTGRAY limit=1
+        diamond > Resource  img=oryx/diamond3 shrinkfactor=0.75 color=YELLOW limit=10
+        boulder > Missile  orientation=DOWN img=oryx/mineral1 color=GRAY speed=0.2
+        background > Immovable  img=oryx/backBlack hidden=True
+        butterfly > RandomNPC  img=oryx/bat2 color=PINK cons=1
+        dirt > Immovable  img=oryx/backLBrown color=BROWN
+        avatar > ShootAvatar  frameRate=8 img=oryx/spelunky stype=sword
+        wall > Immovable  img=oryx/dirtWall autotiling=true
+        exitdoor > Door  img=oryx/door2 color=GREEN
+        crab > RandomNPC  img=oryx/scorpion2 color=RED cons=1
+    LevelMapping
+        . > background dirt
+        - > background
+        e > background exitdoor
+        o > background boulder
+        x > background diamond
+        c > background crab
+        b > background butterfly
+        A > background avatar
+    InteractionSet
+        diamond exitdoor < decreaseSpeedToAll stype=wall value=2
+        avatar crab > killSprite
+        exitdoor diamond < transformTo stype=boulder forceOrientation=true scoreChange=-1
+        crab EOS < spawnIfHasLess stype=wall resource=diamond limit=0 scoreChange=0
+        butterfly EOS < spawnIfHasLess stype=wall resource=diamond limit=0 scoreChange=0
+        wall avatar < pullWithIt
+        background avatar < pullWithIt
+        dirt avatar < pullWithIt
+        avatar EOS > stepBack
+        exitdoor EOS < transformTo stype=diamond forceOrientation=true scoreChange=0
+        boulder EOS > stepBack
+        sword exitdoor < collectResource
+        boulder exitdoor < collectResource
+        butterfly EOS > stepBack
+        crab sword > killSprite scoreChange=1
+        sword crab > killSprite
+        dirt crab < setSpeedForAll stype=wall value=0
+        dirt butterfly < stepBack scoreChange=2
+    TerminationSet
+        SpriteCounter stype=exitdoor limit=0 win=True
+        SpriteCounter stype=avatar limit=0 win=False

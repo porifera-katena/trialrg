@@ -1,0 +1,41 @@
+BasicGame
+    SpriteSet
+        sword > Flicker  singleton=True img=oryx/pickaxe color=LIGHTGRAY limit=1
+        diamond > Resource  img=oryx/diamond3 shrinkfactor=0.75 color=YELLOW limit=10
+        boulder > Missile  orientation=DOWN img=oryx/mineral1 color=GRAY speed=0.2
+        background > Immovable  img=oryx/backBlack hidden=True
+        butterfly > RandomNPC  img=oryx/bat2 color=PINK cons=1
+        dirt > Immovable  img=oryx/backLBrown color=BROWN
+        avatar > ShootAvatar  frameRate=8 img=oryx/spelunky stype=sword
+        wall > Immovable  img=oryx/dirtWall autotiling=true
+        exitdoor > Door  img=oryx/door2 color=GREEN
+        crab > RandomNPC  img=oryx/scorpion2 color=RED cons=1
+    LevelMapping
+        . > background dirt
+        - > background
+        e > background exitdoor
+        o > background boulder
+        x > background diamond
+        c > background crab
+        b > background butterfly
+        A > background avatar
+    InteractionSet
+        exitdoor wall < setSpeedForAll stype=wall value=6
+        avatar crab > killSprite
+        sword butterfly < killIfHasLess resource=diamond limit=7 scoreChange=0
+        boulder avatar < killIfOtherHasMore resource=diamond limit=2
+        wall exitdoor < flipDirection scoreChange=0
+        avatar EOS > stepBack
+        sword EOS < setSpeedForAll stype=wall value=9
+        butterfly crab < stepBack
+        diamond sword boulder < align
+        sword exitdoor < setSpeedForAll stype=diamond value=3 scoreChange=-2
+        boulder exitdoor < setSpeedForAll stype=diamond value=3 scoreChange=-2
+        avatar butterfly < align scoreChange=1
+        exitdoor exitdoor < killAll stype=diamond
+        boulder sword > killSprite scoreChange=1
+        sword avatar < spawnIfHasLess stype=butterfly resource=diamond limit=7
+        boulder avatar < spawnIfHasLess stype=butterfly resource=diamond limit=7
+    TerminationSet
+        SpriteCounter stype=exitdoor limit=0 win=True
+        SpriteCounter stype=avatar limit=0 win=False

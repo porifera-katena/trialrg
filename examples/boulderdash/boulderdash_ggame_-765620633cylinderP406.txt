@@ -1,0 +1,46 @@
+BasicGame
+    SpriteSet
+        sword > Flicker  singleton=True img=oryx/pickaxe color=LIGHTGRAY limit=1
+        diamond > Resource  img=oryx/diamond3 shrinkfactor=0.75 color=YELLOW limit=10
+        boulder > Missile  orientation=DOWN img=oryx/mineral1 color=GRAY speed=0.2
+        background > Immovable  img=oryx/backBlack hidden=True
+        butterfly > RandomNPC  img=oryx/bat2 color=PINK cons=1
+        dirt > Immovable  img=oryx/backLBrown color=BROWN
+        avatar > ShootAvatar  frameRate=8 img=oryx/spelunky stype=sword
+        wall > Immovable  img=oryx/dirtWall autotiling=true
+        exitdoor > Door  img=oryx/door2 color=GREEN
+        crab > RandomNPC  img=oryx/scorpion2 color=RED cons=1
+    LevelMapping
+        . > background dirt
+        - > background
+        e > background exitdoor
+        o > background boulder
+        x > background diamond
+        c > background crab
+        b > background butterfly
+        A > background avatar
+    InteractionSet
+        crab EOS < spawnIfHasMore stype=butterfly resource=diamond limit=6 scoreChange=0
+        wall wall < spawnIfHasMore stype=background resource=diamond limit=3 scoreChange=-2
+        background wall < spawnIfHasMore stype=background resource=diamond limit=3 scoreChange=-2
+        dirt wall < spawnIfHasMore stype=background resource=diamond limit=3 scoreChange=-2
+        avatar butterfly > killSprite
+        wall sword < attractGaze
+        butterfly diamond < killIfHasMore resource=diamond limit=8 scoreChange=0
+        dirt crab butterfly < changeResource resource=diamond value=9 scoreChange=1
+        crab background < killAll stype=boulder scoreChange=1
+        butterfly background < killAll stype=boulder scoreChange=1
+        exitdoor sword boulder < flipDirection scoreChange=0
+        diamond boulder < killIfHasMore resource=diamond limit=8 scoreChange=-2
+        exitdoor avatar < increaseSpeedToAll stype=wall value=1 scoreChange=2
+        dirt avatar < align scoreChange=-1
+        diamond diamond < pullWithIt scoreChange=-2
+        wall background < stepBack scoreChange=-1
+        background background < stepBack scoreChange=-1
+        dirt background < stepBack scoreChange=-1
+        sword butterfly > killSprite
+        boulder sword > killSprite scoreChange=1
+        avatar sword < killSprite
+    TerminationSet
+        SpriteCounter stype=exitdoor limit=0 win=True
+        SpriteCounter stype=avatar limit=0 win=False

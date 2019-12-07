@@ -1,0 +1,51 @@
+BasicGame square_size=32
+    SpriteSet
+        alienBlue > Bomber  prob=0.01 img=oryx/alien1 stype=bomb cooldown=3 speed=0.8
+        background > Immovable  img=oryx/space1 hidden=True
+        portalFast > SpawnPoint  total=20 img=portal hidden=True stype=alienGreen cooldown=12 invisible=True
+        portalSlow > SpawnPoint  total=20 img=portal hidden=True stype=alienBlue cooldown=16 invisible=True
+        alienGreen > Bomber  prob=0.01 img=oryx/alien3 stype=bomb cooldown=3 speed=0.8
+        avatar > FlakAvatar  img=oryx/spaceship1 stype=sam
+        bomb > Missile  orientation=DOWN img=oryx/bullet2 color=RED speed=0.5
+        wall > Immovable  solid=True color=DARKGRAY
+        sam > Missile  singleton=True orientation=UP img=oryx/bullet1 color=BLUE
+        base > Immovable  img=oryx/planet color=WHITE
+    LevelMapping
+        . > background
+        0 > background base
+        1 > background portalSlow
+        2 > background portalFast
+        A > background avatar
+    TerminationSet
+        SpriteCounter stype=portalFast limit=0 win=True
+        SpriteCounter stype=avatar limit=0 win=False
+    InteractionSet
+        portalFast avatar > killSprite scoreChange=1
+        avatar alienGreen > killSprite
+        portalFast < align
+        avatar alienBlue > killSprite
+        background < stepBack
+        portalFast < stepBack
+        base < stepBack
+        avatar < stepBack
+        avatar bomb > killSprite
+        avatar EOS > stepBack
+        background sam bomb < transformTo stype=alienGreen forceOrientation=false scoreChange=0
+        base sam bomb < transformTo stype=alienGreen forceOrientation=false scoreChange=0
+        portalFast sam bomb < transformTo stype=alienGreen forceOrientation=false scoreChange=0
+        bomb EOS > stepBack
+        alienGreen EOS > stepBack
+        sam EOS < killSprite
+        bomb EOS < killSprite
+        sam alienGreen > killSprite
+        alienBlue sam > killSprite scoreChange=1
+        sam alienBlue > killSprite
+        alienGreen sam > killSprite scoreChange=1
+        background bomb < wrapAround scoreChange=-2
+        base bomb < wrapAround scoreChange=-2
+        portalFast bomb < wrapAround scoreChange=-2
+        sam background portalFast base avatar < transformTo stype=avatar forceOrientation=false
+        EOS bomb < setSpeedForAll stype=alienGreen value=4 scoreChange=0
+        sam background portalFast base avatar < addHealthPointsToMax value=3
+        bomb background portalFast base avatar < addHealthPointsToMax value=3
+        sam bomb > killSprite

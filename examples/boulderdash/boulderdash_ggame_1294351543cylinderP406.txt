@@ -1,0 +1,45 @@
+BasicGame
+    SpriteSet
+        sword > Flicker  singleton=True img=oryx/pickaxe color=LIGHTGRAY limit=1
+        diamond > Resource  img=oryx/diamond3 shrinkfactor=0.75 color=YELLOW limit=10
+        boulder > Missile  orientation=DOWN img=oryx/mineral1 color=GRAY speed=0.2
+        background > Immovable  img=oryx/backBlack hidden=True
+        butterfly > RandomNPC  img=oryx/bat2 color=PINK cons=1
+        dirt > Immovable  img=oryx/backLBrown color=BROWN
+        avatar > ShootAvatar  frameRate=8 img=oryx/spelunky stype=sword
+        wall > Immovable  img=oryx/dirtWall autotiling=true
+        exitdoor > Door  img=oryx/door2 color=GREEN
+        crab > RandomNPC  img=oryx/scorpion2 color=RED cons=1
+    LevelMapping
+        . > background dirt
+        - > background
+        e > background exitdoor
+        o > background boulder
+        x > background diamond
+        c > background crab
+        b > background butterfly
+        A > background avatar
+    InteractionSet
+        diamond butterfly < killIfOtherHasMore resource=diamond limit=4
+        avatar wall background dirt < increaseSpeedToAll stype=dirt value=1
+        avatar butterfly > killSprite
+        crab EOS < killIfHasMore resource=diamond limit=7
+        butterfly EOS < killIfHasMore resource=diamond limit=7
+        crab wall < killIfOtherHasMore resource=diamond limit=4 scoreChange=-2
+        butterfly wall < killIfOtherHasMore resource=diamond limit=4 scoreChange=-2
+        avatar EOS > stepBack
+        EOS avatar < killIfOtherHasMore resource=diamond limit=6 scoreChange=0
+        boulder EOS > reverseDirection
+        exitdoor diamond < turnAround scoreChange=0
+        butterfly EOS > reverseDirection
+        wall wall < spawnBehind stype=sword
+        background wall < spawnBehind stype=sword
+        dirt wall < spawnBehind stype=sword
+        crab exitdoor < reverseDirection
+        exitdoor exitdoor < spawnIfHasLess stype=background resource=diamond limit=8
+        exitdoor wall background dirt < killIfOtherHasMore resource=diamond limit=0 scoreChange=1
+        boulder sword > killSprite scoreChange=1
+        avatar diamond < killIfHasLess resource=diamond limit=7
+    TerminationSet
+        SpriteCounter stype=exitdoor limit=0 win=True
+        SpriteCounter stype=avatar limit=0 win=False

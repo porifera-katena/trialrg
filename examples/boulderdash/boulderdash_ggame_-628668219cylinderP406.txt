@@ -1,0 +1,41 @@
+BasicGame
+    SpriteSet
+        sword > Flicker  singleton=True img=oryx/pickaxe color=LIGHTGRAY limit=1
+        diamond > Resource  img=oryx/diamond3 shrinkfactor=0.75 color=YELLOW limit=10
+        boulder > Missile  orientation=DOWN img=oryx/mineral1 color=GRAY speed=0.2
+        background > Immovable  img=oryx/backBlack hidden=True
+        butterfly > RandomNPC  img=oryx/bat2 color=PINK cons=1
+        dirt > Immovable  img=oryx/backLBrown color=BROWN
+        avatar > ShootAvatar  frameRate=8 img=oryx/spelunky stype=sword
+        wall > Immovable  img=oryx/dirtWall autotiling=true
+        exitdoor > Door  img=oryx/door2 color=GREEN
+        crab > RandomNPC  img=oryx/scorpion2 color=RED cons=1
+    LevelMapping
+        . > background dirt
+        - > background
+        e > background exitdoor
+        o > background boulder
+        x > background diamond
+        c > background crab
+        b > background butterfly
+        A > background avatar
+    InteractionSet
+        exitdoor butterfly < killIfOtherHasMore resource=diamond limit=7
+        exitdoor butterfly < wrapAround scoreChange=1
+        butterfly avatar > killSprite scoreChange=1
+        EOS exitdoor < cloneSprite
+        background diamond < align scoreChange=-2
+        diamond avatar < flipDirection
+        wall dirt < spawnIfHasMore stype=butterfly resource=diamond limit=2 scoreChange=-2
+        background dirt < spawnIfHasMore stype=butterfly resource=diamond limit=2 scoreChange=-2
+        dirt dirt < spawnIfHasMore stype=butterfly resource=diamond limit=2 scoreChange=-2
+        crab avatar < stepBack
+        diamond crab butterfly < changeResource resource=diamond value=8 scoreChange=1
+        butterfly EOS < spawnBehind stype=butterfly scoreChange=1
+        wall exitdoor < reverseDirection scoreChange=1
+        wall butterfly < wrapAround
+        background butterfly < wrapAround
+        dirt butterfly < wrapAround
+    TerminationSet
+        SpriteCounter stype=exitdoor limit=0 win=True
+        SpriteCounter stype=avatar limit=0 win=False
