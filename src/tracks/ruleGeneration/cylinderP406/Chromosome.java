@@ -321,7 +321,7 @@ public class Chromosome implements Comparable<Chromosome>{
 									a = b;
 									b = obs.get(j).itype;
 								}
-								String key = a.toString()+b.toString();
+								String key = a.toString()+","+b.toString();
 								if(Log.get(key)!=null) {
 									Log.put(key, Log.get(key)+1);
 								}
