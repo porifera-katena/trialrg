@@ -269,7 +269,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		
 		evolution: while(true) {
 			numberOfIterations++;
-			System.out.println("Generation #" + numberOfIterations + ": ");
+			System.out.println("\nGeneration #" + numberOfIterations + ": ");
 			newChromosomes.clear();
 			String[][] curreentRule = {toStringArray(interactions),toStringArray(terminations)};
 			Chromosome currentChromosome = new Chromosome(curreentRule,sl);
@@ -292,7 +292,13 @@ public class RuleGenerator extends AbstractRuleGenerator{
 			for(Entry<String, Integer> entry : list_entries) {
 				collidedPairs.add(entry.getKey());
 			}
-			
+			for(Interaction I :interactions) {
+				if(I.pair != "") {
+					if(collidedPairs.contains(I.pair)) {
+						collidedPairs.remove(I.pair);
+					}
+				}
+			}
 			
 			for (int i = 0; i < interactions.size(); i++) {
 				//ArrayList<Interaction> copy = (ArrayList<Interaction>) interactions.clone();
@@ -333,6 +339,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 					interactions = copy;
 					if(bestChromosome.compareTo(c)>0) {
 						bestChromosome = c;
+						continue evolution;
 					}
 				}
 				System.out.print("*");
@@ -428,7 +435,9 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				}
 			}
 		}while(newInteraction.contains("<@"));
-		return new Interaction(spritePowerSet.get(i1),spritePowerSet.get(i2),newInteraction);
+		Interaction I = new Interaction(spritePowerSet.get(i1),spritePowerSet.get(i2),newInteraction);
+		I.pair = pair;
+		return I;
 	}
 
 	private Interaction OLD_createInteraction() {

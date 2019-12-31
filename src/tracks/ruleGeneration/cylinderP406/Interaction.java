@@ -8,6 +8,8 @@ public class Interaction {
 	public ArrayList<String> second;
 	public String interactionType;
 	
+	public String pair = "";
+	
 	public Interaction(ArrayList<String> _first,ArrayList<String> _second,String _interactionType) {
 		first = _first;
 		second = _second;
