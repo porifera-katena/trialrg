@@ -1,0 +1,52 @@
+BasicGame square_size=32
+    SpriteSet
+        alienBlue > Bomber  prob=0.01 img=oryx/alien1 stype=bomb cooldown=3 speed=0.8
+        background > Immovable  img=oryx/space1 hidden=True
+        portalFast > SpawnPoint  total=20 img=portal hidden=True stype=alienGreen cooldown=12 invisible=True
+        portalSlow > SpawnPoint  total=20 img=portal hidden=True stype=alienBlue cooldown=16 invisible=True
+        alienGreen > Bomber  prob=0.01 img=oryx/alien3 stype=bomb cooldown=3 speed=0.8
+        avatar > FlakAvatar  img=oryx/spaceship1 stype=sam
+        bomb > Missile  orientation=DOWN img=oryx/bullet2 color=RED speed=0.5
+        wall > Immovable  solid=True color=DARKGRAY
+        sam > Missile  singleton=True orientation=UP img=oryx/bullet1 color=BLUE
+        base > Immovable  img=oryx/planet color=WHITE
+    LevelMapping
+        . > background
+        0 > background base
+        1 > background portalSlow
+        2 > background portalFast
+        A > background avatar
+    TerminationSet
+        SpriteCounter stype=portalFast limit=0 win=True
+        SpriteCounter stype=avatar limit=0 win=False
+    InteractionSet
+        portalFast avatar > killSprite scoreChange=1
+        avatar alienGreen < reverseDirection scoreChange=1
+        bomb avatar > killSprite scoreChange=1
+        EOS alienGreen < setSpeedForAll stype=avatar value=4 scoreChange=-1
+        avatar bomb > killSprite
+        avatar alienGreen > killSprite
+        avatar bomb > killSprite
+        avatar background base portalFast < increaseSpeedToAll stype=avatar value=5 scoreChange=2
+        sam EOS > reverseDirection
+        alienGreen < decreaseSpeedToAll stype=avatar value=6
+        alienGreen EOS > reverseDirection
+        alienBlue EOS > reverseDirection
+        portalFast base < pullWithIt
+        sam alienGreen > killSprite
+        alienBlue sam > killSprite scoreChange=1
+        background base < bounceForward scoreChange=1
+        base base < bounceForward scoreChange=1
+        portalFast base < bounceForward scoreChange=1
+        bomb sam > killSprite scoreChange=1
+        alienGreen base < attractGaze scoreChange=2
+        background < subtractHealthPoints stype=background value=1 scoreChange=0
+        base < subtractHealthPoints stype=background value=1 scoreChange=0
+        portalFast < subtractHealthPoints stype=background value=1 scoreChange=0
+        sam alienGreen > killSprite
+        avatar alienGreen < attractGaze scoreChange=2
+        background bomb < reverseDirection scoreChange=1
+        base bomb < reverseDirection scoreChange=1
+        portalFast bomb < reverseDirection scoreChange=1
+        avatar base < stepBack
+        sam sam bomb < reverseDirection

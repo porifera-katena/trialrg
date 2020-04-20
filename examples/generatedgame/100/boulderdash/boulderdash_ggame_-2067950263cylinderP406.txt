@@ -1,0 +1,40 @@
+BasicGame
+    SpriteSet
+        sword > Flicker  singleton=True img=oryx/pickaxe color=LIGHTGRAY limit=1
+        diamond > Resource  img=oryx/diamond3 shrinkfactor=0.75 color=YELLOW limit=10
+        boulder > Missile  orientation=DOWN img=oryx/mineral1 color=GRAY speed=0.2
+        background > Immovable  img=oryx/backBlack hidden=True
+        butterfly > RandomNPC  img=oryx/bat2 color=PINK cons=1
+        dirt > Immovable  img=oryx/backLBrown color=BROWN
+        avatar > ShootAvatar  frameRate=8 img=oryx/spelunky stype=sword
+        wall > Immovable  img=oryx/dirtWall autotiling=true
+        exitdoor > Door  img=oryx/door2 color=GREEN
+        crab > RandomNPC  img=oryx/scorpion2 color=RED cons=1
+    LevelMapping
+        . > background dirt
+        - > background
+        e > background exitdoor
+        o > background boulder
+        x > background diamond
+        c > background crab
+        b > background butterfly
+        A > background avatar
+    InteractionSet
+        diamond avatar > collectResource
+        exitdoor dirt < decreaseSpeedToAll stype=wall value=4 scoreChange=-1
+        avatar butterfly > killSprite
+        butterfly diamond < setSpeedForAll stype=crab value=7 scoreChange=-1
+        boulder avatar > killSprite scoreChange=1
+        avatar EOS > stepBack
+        butterfly dirt < killIfHasLess resource=diamond limit=1
+        crab diamond < setSpeedForAll stype=avatar value=7 scoreChange=1
+        butterfly diamond < pullWithIt
+        sword wall < removeScore  stype=sword scoreChange=-1
+        boulder wall < removeScore  stype=sword scoreChange=-1
+        butterfly boulder < setSpeedForAll stype=background value=4 scoreChange=0
+        EOS butterfly < killIfFromAbove scoreChange=-1
+        exitdoor dirt < killIfHasMore resource=diamond limit=4
+        background exitdoor < subtractHealthPoints stype=dirt value=3 scoreChange=1
+    TerminationSet
+        SpriteCounter stype=exitdoor limit=0 win=True
+        SpriteCounter stype=avatar limit=0 win=False

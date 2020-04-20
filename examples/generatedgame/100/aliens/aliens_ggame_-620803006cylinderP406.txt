@@ -1,0 +1,46 @@
+BasicGame square_size=32
+    SpriteSet
+        alienBlue > Bomber  prob=0.01 img=oryx/alien1 stype=bomb cooldown=3 speed=0.8
+        background > Immovable  img=oryx/space1 hidden=True
+        portalFast > SpawnPoint  total=20 img=portal hidden=True stype=alienGreen cooldown=12 invisible=True
+        portalSlow > SpawnPoint  total=20 img=portal hidden=True stype=alienBlue cooldown=16 invisible=True
+        alienGreen > Bomber  prob=0.01 img=oryx/alien3 stype=bomb cooldown=3 speed=0.8
+        avatar > FlakAvatar  img=oryx/spaceship1 stype=sam
+        bomb > Missile  orientation=DOWN img=oryx/bullet2 color=RED speed=0.5
+        wall > Immovable  solid=True color=DARKGRAY
+        sam > Missile  singleton=True orientation=UP img=oryx/bullet1 color=BLUE
+        base > Immovable  img=oryx/planet color=WHITE
+    LevelMapping
+        . > background
+        0 > background base
+        1 > background portalSlow
+        2 > background portalFast
+        A > background avatar
+    TerminationSet
+        SpriteCounter stype=base limit=0 win=True
+        SpriteCounter stype=avatar limit=0 win=False
+    InteractionSet
+        portalFast avatar > killSprite scoreChange=1
+        sam portalFast < setSpeedForAll stype=alienGreen value=3
+        bomb portalFast < setSpeedForAll stype=alienGreen value=3
+        bomb avatar > killSprite scoreChange=1
+        bomb sam < killSprite scoreChange=0
+        background background portalFast base avatar < addHealthPoints value=6 scoreChange=1
+        avatar alienGreen > killSprite
+        avatar bomb > killSprite
+        avatar EOS > stepBack
+        sam portalFast < wrapAround
+        alienGreen EOS > stepBack
+        alienBlue EOS > stepBack
+        alienGreen sam > killSprite scoreChange=1
+        EOS bomb < reverseDirection scoreChange=0
+        alienBlue sam > killSprite scoreChange=1
+        sam alienBlue > killSprite
+        bomb sam > killSprite scoreChange=1
+        sam bomb > killSprite
+        bomb background base portalFast < setSpeedForAll stype=bomb value=8 scoreChange=1
+        sam alienGreen > killSprite
+        portalFast sam > killSprite scoreChange=1
+        avatar bomb < addHealthPoints value=2
+        avatar base < stepBack
+        sam bomb > killSprite

@@ -1,0 +1,50 @@
+BasicGame square_size=32
+    SpriteSet
+        alienBlue > Bomber  prob=0.01 img=oryx/alien1 stype=bomb cooldown=3 speed=0.8
+        background > Immovable  img=oryx/space1 hidden=True
+        portalFast > SpawnPoint  total=20 img=portal hidden=True stype=alienGreen cooldown=12 invisible=True
+        portalSlow > SpawnPoint  total=20 img=portal hidden=True stype=alienBlue cooldown=16 invisible=True
+        alienGreen > Bomber  prob=0.01 img=oryx/alien3 stype=bomb cooldown=3 speed=0.8
+        avatar > FlakAvatar  img=oryx/spaceship1 stype=sam
+        bomb > Missile  orientation=DOWN img=oryx/bullet2 color=RED speed=0.5
+        wall > Immovable  solid=True color=DARKGRAY
+        sam > Missile  singleton=True orientation=UP img=oryx/bullet1 color=BLUE
+        base > Immovable  img=oryx/planet color=WHITE
+    LevelMapping
+        . > background
+        0 > background base
+        1 > background portalSlow
+        2 > background portalFast
+        A > background avatar
+    TerminationSet
+        SpriteCounter stype=portalFast limit=0 win=True
+        SpriteCounter stype=avatar limit=0 win=False
+    InteractionSet
+        sam avatar < addHealthPointsToMax value=6
+        bomb avatar < addHealthPointsToMax value=6
+        avatar alienGreen > killSprite
+        bomb avatar > killSprite scoreChange=1
+        avatar alienBlue > killSprite
+        background base < reverseDirection
+        base base < reverseDirection
+        portalFast base < reverseDirection
+        bomb avatar > killSprite scoreChange=1
+        sam avatar < pullWithIt
+        bomb avatar < pullWithIt
+        EOS portalFast < addHealthPointsToMax value=4 scoreChange=-2
+        alienGreen EOS > turnAround
+        portalFast avatar < killIfFromAbove
+        alienGreen background base portalFast < flipDirection
+        background < transformTo stype=avatar forceOrientation=true
+        portalFast < transformTo stype=avatar forceOrientation=true
+        base < transformTo stype=avatar forceOrientation=true
+        avatar < transformTo stype=avatar forceOrientation=true
+        alienBlue sam > killSprite scoreChange=1
+        background alienGreen < increaseSpeedToAll stype=background value=3 scoreChange=0
+        background bomb < spawnBehind stype=alienGreen
+        portalFast bomb < spawnBehind stype=alienGreen
+        base bomb < spawnBehind stype=alienGreen
+        avatar bomb < spawnBehind stype=alienGreen
+        sam bomb > killSprite
+        avatar sam bomb < addHealthPointsToMax value=8
+        sam portalFast > killSprite

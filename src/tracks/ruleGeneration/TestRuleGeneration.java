@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 import tracks.ruleGeneration.climbRuleGenerator.SharedData;
@@ -58,7 +60,7 @@ public class TestRuleGeneration {
 		boolean visuals = true;
 		Random random = new Random();
 		int seed = random.nextInt();
-		int gameIdx = 11;
+		int gameIdx = 0;
 		int levelIdx = 1;
 
 
@@ -83,15 +85,35 @@ public class TestRuleGeneration {
 		String Generator = "";
 		int gameIds[] = {0,11,76};
 		String record = "collChecksimevo"+seed+".txt";
-		//RuleGenMachine.playOneGame(game, generateRulePath+"collChecksimevo-1417244698.txt", level1, recordActionsFile, seed);
+		String gamet = generateRulePath+"100/"+"aliens_ggame_-895003241cylinderP406.txt";
+		
 		for(int i=0;i<100;i++) {
 			seed = random.nextInt();
-			record = "collChecksimevo"+seed+".txt";
+			record = "collChecksimevo_2020_"+seed+".txt";
+			RuleGenMachine.generateRules(game, level1, generatorPath + Generators[3] + generatorClass, record, seed);
+		}
+		
+		File file = new File("examples/generatedgame/100/aliens/");
+        File files[] = file.listFiles();
+        for(File f:files) {
+        	String filename = f.getName();
+        	System.out.println(filename);
+        	gamet = generateRulePath+"100/aliens/"+filename;
+    		RuleGenMachine.runOneGame(game,gamet , level1, true,sampleOLETSController , null, seed, 0);
+        }
+        
+		RuleGenMachine.runOneGame(game,gamet , level1, true,sampleOLETSController , null, seed, 0);
+		RuleGenMachine.runOneGame(game,gamet , level1, true,simpleRandomController , null, seed, 0);
+		RuleGenMachine.playOneGame(game, gamet, level1, recordActionsFile, seed);
+		/*for(int i=0;i<100;i++) {
+			seed = random.nextInt();
+			record = "collChecksimevo_2020_"+seed+".txt";
 			RuleGenMachine.generateRules(game, level1, generatorPath + Generators[3] + generatorClass, record, seed);
 		}
 		
 		seed = random.nextInt();
 		RuleGenMachine.generateRules(game, level1, generatorPath + Generators[3] + generatorClass, "collChecksimevo"+seed+".txt", seed);
+		*/
 		/*
 		RuleGenMachine.playOneGame(game, generateRulePath+"aliens_mutated.txt", level1, recordActionsFile, seed);
 */

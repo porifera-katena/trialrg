@@ -65,15 +65,19 @@ public class RuleGenerator extends AbstractRuleGenerator{
 	public static LevelAnalyzer la;
 	
 	public boolean LoopFlag=true;
-
+	
 	private String[] availableInteractions = new String[] { 
+			"killSprite","killIfFromAbove","stepBack","cloneSprite","transformTo stype=<@stype@> forceOrientation=<@bool@>","flipDirection"
+	};
+
+	/*private String[] availableInteractions_OLD = new String[] { 
 			"killSprite", "killAll stype=<@stype@>", "killIfHasMore resource=<@resource@> limit=<@limit@>", "killIfHasLess resource=<@resource@> limit=<@limit@>",
 			"killIfFromAbove", "killIfOtherHasMore resource=<@resource@> limit=<@limit@>", "spawnBehind stype=<@stype@>", "stepBack", "spawnIfHasMore stype=<@stype@> resource=<@resource@> limit=<@limit@>", "spawnIfHasLess stype=<@stype@> resource=<@resource@> limit=<@limit@>",
-			"cloneSprite", "transformTo stype=<@stype@> forceOrientation=<@bool@>", "flipDirection", /*"transformToRandomChild  stype=<@stype@>", "updateSpawnType stype=<@stype@> spawnPoint=<@stype@>",*/
+			"cloneSprite", "transformTo stype=<@stype@> forceOrientation=<@bool@>", "flipDirection", /*"transformToRandomChild  stype=<@stype@>", "updateSpawnType stype=<@stype@> spawnPoint=<@stype@>",
 			"removeScore  stype=<@stype@>", "addHealthPoints value=<@value@>", "addHealthPointsToMax value=<@value@>", "reverseDirection", "subtractHealthPoints stype=<@stype@> value=<@value@>",
 			"increaseSpeedToAll stype=<@stype@> value=<@value@>", "decreaseSpeedToAll stype=<@stype@> value=<@value@>", "attractGaze", "align", "turnAround", "wrapAround",
-			"pullWithIt", "bounceForward",/* "teleportToExit",*/ "collectResource", "setSpeedForAll stype=<@stype@> value=<@value@>",// "undoAll",
-			"reverseDirection", "changeResource resource=<@resource@> value=<@value@>" };
+			"pullWithIt", "bounceForward",/* "teleportToExit", "collectResource", "setSpeedForAll stype=<@stype@> value=<@value@>",// "undoAll",
+			"reverseDirection", "changeResource resource=<@resource@> value=<@value@>" };*/
 	/*private String[] killingInteractions = new String[] { 
 			"killSprite", "killAll stype=<@stype@>", "killIfHasMore resource=<@resource@> limit=<@limit@>", "killIfHasLess resource=<@resource@> limit=<@limit@>",
 			"killIfFromAbove", "killIfOtherHasMore resource=<@resource@> limit=<@limit@>"};*/
@@ -211,10 +215,27 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		Chromosome.spriteSetStruct=constGen.getSpriteSetStructure();
 		Chromosome.random = random;
 		
+		String[][] curreentRule = {{""},{""}};
+		Chromosome currentChromosome = new Chromosome(curreentRule,sl);
+		currentChromosome.setLogging(true);
+		currentChromosome.calculateFitnessLight(EVALUATION_TIME);
+		
+		List<Entry<String, Integer>> list_entries = new ArrayList<Entry<String, Integer>>(currentChromosome.Log.entrySet());
+		Collections.sort(list_entries, new Comparator<Entry<String, Integer>>() {
+			public int compare(Entry<String, Integer> obj1, Entry<String, Integer> obj2) {
+				return obj1.getValue().compareTo(obj2.getValue());
+			}
+		});
+		collidedPairs.clear();
+		for(Entry<String, Integer> entry : list_entries) {
+			collidedPairs.add(entry.getKey());
+		}
+		
+		
 		terminations = new ArrayList<Interaction>();
 		interactions = new ArrayList<Interaction>();
-		for (String r:initialRule[0]) {
-			Interaction I = new Interaction(r);
+		for (String r:collidedPairs) {
+			Interaction I = createInteraction();
 			interactions.add(I);
 		}
 		for (String r:initialRule[1]) {
@@ -299,6 +320,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 					}
 				}
 			}
+			System.out.println(collidedPairs.size());
 			
 			for (int i = 0; i < interactions.size(); i++) {
 				//ArrayList<Interaction> copy = (ArrayList<Interaction>) interactions.clone();

@@ -1,0 +1,39 @@
+BasicGame
+    SpriteSet
+        sword > Flicker  singleton=True img=oryx/pickaxe color=LIGHTGRAY limit=1
+        diamond > Resource  img=oryx/diamond3 shrinkfactor=0.75 color=YELLOW limit=10
+        boulder > Missile  orientation=DOWN img=oryx/mineral1 color=GRAY speed=0.2
+        background > Immovable  img=oryx/backBlack hidden=True
+        butterfly > RandomNPC  img=oryx/bat2 color=PINK cons=1
+        dirt > Immovable  img=oryx/backLBrown color=BROWN
+        avatar > ShootAvatar  frameRate=8 img=oryx/spelunky stype=sword
+        wall > Immovable  img=oryx/dirtWall autotiling=true
+        exitdoor > Door  img=oryx/door2 color=GREEN
+        crab > RandomNPC  img=oryx/scorpion2 color=RED cons=1
+    LevelMapping
+        . > background dirt
+        - > background
+        e > background exitdoor
+        o > background boulder
+        x > background diamond
+        c > background crab
+        b > background butterfly
+        A > background avatar
+    InteractionSet
+        wall wall background dirt < transformTo stype=background forceOrientation=true scoreChange=0
+        avatar butterfly < changeResource resource=diamond value=6
+        diamond dirt < align scoreChange=1
+        diamond wall background dirt < spawnIfHasMore stype=butterfly resource=diamond limit=3
+        sword wall background dirt < cloneSprite scoreChange=2
+        exitdoor crab butterfly < bounceForward scoreChange=-2
+        diamond wall < killIfHasMore resource=diamond limit=2 scoreChange=-2
+        boulder EOS > stepBack
+        exitdoor diamond < collectResource
+        dirt wall < reverseDirection scoreChange=-2
+        butterfly crab < bounceForward scoreChange=1
+        sword butterfly > killSprite
+        boulder sword > killSprite scoreChange=1
+        diamond avatar < killIfFromAbove scoreChange=-2
+    TerminationSet
+        SpriteCounter stype=exitdoor limit=0 win=True
+        SpriteCounter stype=avatar limit=0 win=False

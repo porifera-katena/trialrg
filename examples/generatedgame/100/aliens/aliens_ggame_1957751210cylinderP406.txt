@@ -1,0 +1,53 @@
+BasicGame square_size=32
+    SpriteSet
+        alienBlue > Bomber  prob=0.01 img=oryx/alien1 stype=bomb cooldown=3 speed=0.8
+        background > Immovable  img=oryx/space1 hidden=True
+        portalFast > SpawnPoint  total=20 img=portal hidden=True stype=alienGreen cooldown=12 invisible=True
+        portalSlow > SpawnPoint  total=20 img=portal hidden=True stype=alienBlue cooldown=16 invisible=True
+        alienGreen > Bomber  prob=0.01 img=oryx/alien3 stype=bomb cooldown=3 speed=0.8
+        avatar > FlakAvatar  img=oryx/spaceship1 stype=sam
+        bomb > Missile  orientation=DOWN img=oryx/bullet2 color=RED speed=0.5
+        wall > Immovable  solid=True color=DARKGRAY
+        sam > Missile  singleton=True orientation=UP img=oryx/bullet1 color=BLUE
+        base > Immovable  img=oryx/planet color=WHITE
+    LevelMapping
+        . > background
+        0 > background base
+        1 > background portalSlow
+        2 > background portalFast
+        A > background avatar
+    TerminationSet
+        SpriteCounter stype=background limit=0 win=True
+        SpriteCounter stype=avatar limit=0 win=False
+    InteractionSet
+        background portalFast < killAll stype=alienGreen scoreChange=2
+        base portalFast < killAll stype=alienGreen scoreChange=2
+        portalFast portalFast < killAll stype=alienGreen scoreChange=2
+        avatar alienGreen > killSprite
+        avatar bomb > killSprite
+        avatar alienBlue > killSprite
+        EOS portalFast < increaseSpeedToAll stype=bomb value=5 scoreChange=0
+        background alienGreen < removeScore  stype=portalFast scoreChange=0
+        avatar bomb > killSprite
+        avatar EOS > stepBack
+        sam EOS > wrapAround
+        sam avatar < killSprite
+        bomb avatar < bounceForward
+        base < turnAround scoreChange=0
+        sam alienGreen > killSprite
+        bomb sam > killSprite scoreChange=1
+        sam bomb > killSprite
+        background avatar < increaseSpeedToAll stype=sam value=9
+        base avatar < increaseSpeedToAll stype=sam value=9
+        portalFast avatar < increaseSpeedToAll stype=sam value=9
+        portalFast alienGreen < removeScore  stype=alienGreen scoreChange=1
+        bomb sam < spawnBehind stype=alienGreen scoreChange=2
+        sam bomb > killSprite
+        background background < spawnBehind stype=portalFast scoreChange=2
+        portalFast background < spawnBehind stype=portalFast scoreChange=2
+        base background < spawnBehind stype=portalFast scoreChange=2
+        avatar background < spawnBehind stype=portalFast scoreChange=2
+        sam alienGreen > killSprite
+        portalFast sam > killSprite scoreChange=1
+        sam portalFast > killSprite
+        sam bomb > killSprite
