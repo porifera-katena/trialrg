@@ -259,6 +259,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				interactions.add(createInteraction());
 				sl.testRules(toStringArray(interactions),toStringArray(terminations));
 			}
+			collidedPairs.remove(interactions.get(interactions.size()-1).pair);
 		}
 	}
 
@@ -405,7 +406,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 	}
 	
 	private Interaction createInteraction() {
-		String newInteraction = "";
+		
 		if(collidedPairs.size()==0) {
 			return OLD_createInteraction();
 		}
@@ -415,6 +416,12 @@ public class RuleGenerator extends AbstractRuleGenerator{
 				pair = p;
 			}
 		}
+		return createInteraction(pair);
+	}
+	
+	private Interaction createInteraction(String _pair) {
+		
+		String pair = _pair;
 		
 		int i1 = Integer.parseInt(pair.split(",")[0]);
 		int i2 = Integer.parseInt(pair.split(",")[1]);
@@ -427,7 +434,7 @@ public class RuleGenerator extends AbstractRuleGenerator{
 		ArrayList<String> second = new ArrayList<String>();
 		first.add(itypeToName.get(i1));
 		second.add(itypeToName.get(i2));
-
+		String newInteraction = "";
 		do {
 			String scoreChange = "";
 			if(random.nextBoolean()){
@@ -510,8 +517,8 @@ public class RuleGenerator extends AbstractRuleGenerator{
 	}
 	private String[] toStringArray(ArrayList<Interaction> Ilist, int target2) {
 		ArrayList<String> arlist = new ArrayList<String>();
-		for(int i=0;i<arlist.size();i++) {
-			if(i!=0) {
+		for(int i=0;i<Ilist.size();i++) {
+			if(i!=target2) {
 				arlist.addAll(Ilist.get(i).ToInteractionString());
 			}
 		}

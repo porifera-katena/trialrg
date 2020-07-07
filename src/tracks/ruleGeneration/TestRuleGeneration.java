@@ -85,14 +85,16 @@ public class TestRuleGeneration {
 		String Generator = "";
 		int gameIds[] = {0,11,76};
 		String record = "collChecksimevo"+seed+".txt";
-		String gamet = generateRulePath+"100/"+"aliens_ggame_-895003241cylinderP406.txt";
+		String gamet = generateRulePath+"try.txt";
+		
+		//RuleGenMachine.playOneGame(gamet, gamet, level1, recordActionsFile, seed);
 		
 		for(int i=0;i<100;i++) {
 			seed = random.nextInt();
 			record = "collChecksimevo_2020_"+seed+".txt";
 			RuleGenMachine.generateRules(game, level1, generatorPath + Generators[3] + generatorClass, record, seed);
 		}
-		
+		/*
 		File file = new File("examples/generatedgame/100/aliens/");
         File files[] = file.listFiles();
         for(File f:files) {
@@ -104,7 +106,7 @@ public class TestRuleGeneration {
         
 		RuleGenMachine.runOneGame(game,gamet , level1, true,sampleOLETSController , null, seed, 0);
 		RuleGenMachine.runOneGame(game,gamet , level1, true,simpleRandomController , null, seed, 0);
-		RuleGenMachine.playOneGame(game, gamet, level1, recordActionsFile, seed);
+		RuleGenMachine.playOneGame(game, gamet, level1, recordActionsFile, seed);*/
 		/*for(int i=0;i<100;i++) {
 			seed = random.nextInt();
 			record = "collChecksimevo_2020_"+seed+".txt";
